@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'NPNHCREATIVE',
+    'history_title' => 'NPNHCREATIVE History',
+    'history_heading' => 'Conversion History',
+    'file_name' => 'File Name',
+    'original_size' => 'Original Size',
+    'output_size' => 'Output Size',
+    'speed' => 'Speed',
+    'amplify' => 'Amplify',
+    'no_conversions' => 'No conversions yet.',
+    'workspace_copy' => 'Premium audio conversion workspace for Roblox creators.',
+    'open_converter' => 'Open Converter',
+    'settings_title' => 'NPNHCREATIVE Settings',
+    'settings_heading' => 'Converter Settings',
+    'settings_desc' => 'Production defaults for queue, storage, upload, and output behavior.',
+    'default_preset' => 'Default preset',
+    'storage_path' => 'Storage Path',
+    'temporary_file_expiration' => 'Temporary File Expiration',
+    'hours' => 'hours',
+    'max_upload_size' => 'Max Upload Size',
+    'queue_name' => 'Queue Name',
+    'auto_delete_file' => 'Auto Delete File',
+    'default_output_format' => 'Default Output Format',
+];

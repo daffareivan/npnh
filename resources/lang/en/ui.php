@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'quick_actions' => 'Quick Actions',
+    'open_converter' => 'Open Converter',
+    'manage_users' => 'Manage Users',
+    'create_plan' => 'Create Plan',
+    'credit_settings' => 'Credit Settings',
+    'homepage_reviews' => 'Homepage Reviews',
+    'app_settings' => 'App Settings',
+    'notifications' => 'Notifications',
+    'latest_activity' => 'Latest platform activity',
+    'view_activity_log' => 'View Activity Log',
+    'no_recent_activity' => 'No recent activity.',
+    'profile' => 'Profile',
+    'settings' => 'Settings',
+    'logout' => 'Logout',
+    'theme' => 'Theme',
+    'language' => 'Language',
+    'light' => 'Light',
+    'dark' => 'Dark',
+    'system' => 'System',
+    'english' => 'English',
+    'indonesia' => 'Indonesia',
+    'search_placeholder' => 'Search menus, settings, users...',
+    'toggle_sidebar' => 'Toggle sidebar',
+    'toggle_mobile_menu' => 'Toggle mobile menu',
+];

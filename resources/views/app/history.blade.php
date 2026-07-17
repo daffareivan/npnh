@@ -1,0 +1,75 @@
+@extends('layouts.user-app')
+
+@section('content')
+    <section class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div class="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-sm font-medium text-white">History</p>
+                <h1 class="mt-2 text-4xl font-semibold tracking-tight text-white">Conversion history</h1>
+                <p class="mt-2 text-[#A3A3A3]">Search, download, delete, or reconvert previous audio files.</p>
+            </div>
+            <a href="{{ route('app.converter') }}" class="wx-btn-primary px-5 py-3 text-center">New Conversion</a>
+        </div>
+
+        <form class="wx-card mb-5 grid gap-3 p-3 sm:grid-cols-[1fr_180px_auto]">
+            <input name="search" value="{{ request('search') }}" class="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white outline-none placeholder:text-[#A3A3A3] focus:border-[#FFFFFF]/50" placeholder="Search file">
+            <select name="status" class="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white outline-none">
+                <option value="">All status</option>
+                @foreach(['uploaded','pending','analyzing','converting','encoding','finished','failed'] as $status)
+                    <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst($status) }}</option>
+                @endforeach
+            </select>
+            <button class="wx-btn-secondary px-5 py-3">Filter</button>
+        </form>
+
+        <div class="grid gap-3">
+            @forelse($files as $file)
+                <article class="wx-card-solid wx-hover-lift p-5">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h2 class="truncate text-lg font-semibold text-white">{{ $file->original_name }}</h2>
+                                <x-wx.badge :tone="$file->status->value === 'finished' ? 'success' : ($file->status->value === 'failed' ? 'danger' : 'default')">{{ ucfirst($file->status->value) }}</x-wx.badge>
+                            </div>
+                            <div class="mt-3 flex flex-wrap gap-3 text-sm text-[#A3A3A3]">
+                                <span>{{ $file->created_at->format('M d, Y H:i') }}</span>
+                                <span>Preset {{ $file->speed }}x</span>
+                                <span>{{ \Illuminate\Support\Number::fileSize($file->output_size ?: $file->original_size) }}</span>
+                                <span>{{ $file->duration ? number_format((float) $file->duration, 2).'s' : 'Duration pending' }}</span>
+                                <span>Roblox: {{ ucfirst($file->roblox_status ?? 'pending') }}</span>
+                                @if($file->roblox_asset_id)
+                                    <span>Asset ID {{ $file->roblox_asset_id }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            @if($file->output_path)
+                                <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('api.converter.download', now()->addMinutes(15), $file) }}" class="wx-btn-primary px-4 py-2.5 text-sm">Download</a>
+                            @endif
+                            @if($file->roblox_creator_url)
+                                <a href="{{ $file->roblox_creator_url }}" target="_blank" rel="noopener" class="wx-btn-secondary px-4 py-2.5 text-sm">Open Creator Hub</a>
+                            @endif
+                            @if($file->roblox_asset_id)
+                                <button type="button" onclick="navigator.clipboard.writeText('{{ $file->roblox_asset_id }}')" class="wx-btn-secondary px-4 py-2.5 text-sm">Copy Asset ID</button>
+                            @endif
+                            <a href="{{ route('app.converter') }}" class="wx-btn-secondary px-4 py-2.5 text-sm">Reconvert</a>
+                            <button onclick="axios.delete('/api/converter/history/{{ $file->id }}').then(() => location.reload())" class="rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-2.5 text-sm text-rose-200 transition hover:bg-rose-400/15">Delete</button>
+                        </div>
+                    </div>
+                </article>
+            @empty
+                <div class="wx-card grid min-h-72 place-items-center p-8 text-center">
+                    <div>
+                        <div class="mx-auto grid size-14 place-items-center rounded-2xl bg-white/[0.05] text-white">
+                            <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/></svg>
+                        </div>
+                        <h2 class="mt-5 text-xl font-semibold">No conversions yet</h2>
+                        <p class="mt-2 text-[#A3A3A3]">Upload your first audio file to build your history.</p>
+                    </div>
+                </div>
+            @endforelse
+        </div>
+
+        <div class="mt-6">{{ $files->links() }}</div>
+    </section>
+@endsection

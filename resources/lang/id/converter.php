@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'NPNHCREATIVE',
+    'history_title' => 'Riwayat NPNHCREATIVE',
+    'history_heading' => 'Riwayat Konversi',
+    'file_name' => 'Nama File',
+    'original_size' => 'Ukuran Asli',
+    'output_size' => 'Ukuran Output',
+    'speed' => 'Kecepatan',
+    'amplify' => 'Amplify',
+    'no_conversions' => 'Belum ada konversi.',
+    'workspace_copy' => 'Workspace konversi audio premium untuk kreator Roblox.',
+    'open_converter' => 'Buka Converter',
+    'settings_title' => 'Pengaturan NPNHCREATIVE',
+    'settings_heading' => 'Pengaturan Converter',
+    'settings_desc' => 'Default produksi untuk antrean, storage, upload, dan perilaku output.',
+    'default_preset' => 'Preset default',
+    'storage_path' => 'Path Storage',
+    'temporary_file_expiration' => 'Masa Berlaku File Sementara',
+    'hours' => 'jam',
+    'max_upload_size' => 'Ukuran Upload Maksimal',
+    'queue_name' => 'Nama Queue',
+    'auto_delete_file' => 'Hapus File Otomatis',
+    'default_output_format' => 'Format Output Default',
+];

@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'quick_actions' => 'Aksi Cepat',
+    'open_converter' => 'Buka Converter',
+    'manage_users' => 'Kelola Pengguna',
+    'create_plan' => 'Buat Paket',
+    'credit_settings' => 'Pengaturan Kredit',
+    'homepage_reviews' => 'Review Homepage',
+    'app_settings' => 'Pengaturan Aplikasi',
+    'notifications' => 'Notifikasi',
+    'latest_activity' => 'Aktivitas platform terbaru',
+    'view_activity_log' => 'Lihat Aktivitas',
+    'no_recent_activity' => 'Belum ada aktivitas terbaru.',
+    'profile' => 'Profil',
+    'settings' => 'Pengaturan',
+    'logout' => 'Keluar',
+    'theme' => 'Tema',
+    'language' => 'Bahasa',
+    'light' => 'Terang',
+    'dark' => 'Gelap',
+    'system' => 'Sistem',
+    'english' => 'Inggris',
+    'indonesia' => 'Indonesia',
+    'search_placeholder' => 'Cari menu, pengaturan, pengguna...',
+    'toggle_sidebar' => 'Buka tutup sidebar',
+    'toggle_mobile_menu' => 'Buka tutup menu mobile',
+];
