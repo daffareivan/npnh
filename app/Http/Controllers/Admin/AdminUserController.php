@@ -33,6 +33,31 @@ class AdminUserController extends Controller
         ]);
     }
 
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+            'role' => ['required', 'in:admin,user'],
+            'status' => ['required', 'in:active,suspended'],
+        ]);
+
+        $user = User::query()->create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'provider' => 'local',
+            'role' => $data['role'],
+            'status' => $data['status'],
+            'email_verified_at' => now(),
+        ]);
+
+        $user->syncRoles([$data['role']]);
+
+        return back()->with('status', "User {$user->name} created.");
+    }
+
     public function addCredits(Request $request, User $user, CreditService $credits): RedirectResponse
     {
         $data = $request->validate([

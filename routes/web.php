@@ -104,6 +104,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::get('/', [AdminDashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])->name('dashboard.show');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::post('/users/{user}/credits', [AdminUserController::class, 'addCredits'])->name('users.credits.add');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');

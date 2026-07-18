@@ -10,7 +10,9 @@
       "Bash(netstat -ano)",
       "Bash(awk '{print $2}')",
       "Bash(npx --no-install vite build)",
-      "Bash(taskkill //F //PID 16976)"
+      "Bash(taskkill //F //PID 16976)",
+      "Bash(grep -n 'fillable\\\\|protected $table' -A 20 /d/converter/app/Models/AudioFile.php)",
+      "Bash(php -l routes/web.php)"
     ]
   }
 }
