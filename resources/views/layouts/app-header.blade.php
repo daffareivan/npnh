@@ -15,18 +15,22 @@
 <header class="sticky top-0 z-99999 flex w-full border-b backdrop-blur-xl" style="background: color-mix(in srgb, var(--topbar) 82%, transparent); border-color: var(--border); color: var(--topbar-foreground);" x-data="{ mobileMenu: false, quickOpen: false, searchOpen: false, query: '' }">
     <div class="flex w-full flex-col items-center justify-between xl:flex-row xl:px-6">
         <div class="flex w-full items-center justify-between gap-2 border-b px-3 py-3 sm:gap-4 xl:justify-normal xl:border-b-0 xl:px-0 lg:py-4" style="border-color: var(--border);">
-            <button class="wx-icon-button hidden size-11 items-center justify-center rounded-2xl xl:flex" @click="$store.sidebar.toggleExpanded()" aria-label="{{ __('ui.toggle_sidebar') }}">
+            <button class="wx-icon-button hidden size-11 items-center justify-center rounded-2xl md:flex" @click="$store.sidebar.toggleExpanded()" aria-label="{{ __('ui.toggle_sidebar') }}">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h16"/></svg>
             </button>
 
-            <button class="wx-icon-button grid size-11 place-items-center rounded-2xl xl:hidden" @click="$store.sidebar.toggleMobileOpen()" aria-label="{{ __('ui.toggle_mobile_menu') }}">
+            <button class="wx-icon-button grid size-11 place-items-center rounded-2xl md:hidden" @click="$store.sidebar.toggleMobileOpen()" aria-label="{{ __('ui.toggle_mobile_menu') }}">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
             </button>
 
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 xl:hidden">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 md:hidden">
                 <span class="wx-pill grid size-10 place-items-center rounded-2xl">{!! \App\Helpers\MenuHelper::getIconSvg('audio-lines') !!}</span>
                 <span class="font-semibold">NPNHCREATIVE</span>
             </a>
+
+            <button @click="searchOpen = !searchOpen" class="wx-icon-button grid size-11 place-items-center rounded-2xl xl:hidden" aria-label="{{ __('ui.search_placeholder') }}">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+            </button>
 
             <button @click="mobileMenu = !mobileMenu" class="wx-icon-button grid size-11 place-items-center rounded-2xl xl:hidden">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12h.01"/><path d="M19 12h.01"/><path d="M5 12h.01"/></svg>
@@ -45,6 +49,21 @@
                         </a>
                     @endforeach
                 </div>
+            </div>
+        </div>
+
+        <div x-show="searchOpen" x-transition @click.away="searchOpen = false" class="relative w-full border-b px-3 py-3 xl:hidden" style="border-color: var(--border);">
+            <span class="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2" style="color: var(--muted-foreground);">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+            </span>
+            <input x-model="query" type="text" placeholder="{{ __('ui.search_placeholder') }}" class="wx-field h-11 w-full rounded-2xl py-2.5 pl-12 pr-4 text-sm outline-none">
+            <div class="wx-menu-popover mt-2 max-h-72 w-full overflow-y-auto rounded-2xl p-2">
+                @foreach($searchItems as $item)
+                    <a href="{{ $navigation->href($item) }}" x-show="query === '' || '{{ strtolower($navigation->title($item)) }}'.includes(query.toLowerCase())" class="wx-menu-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm">
+                        <span style="color: var(--foreground);">{!! \App\Helpers\MenuHelper::getIconSvg($item->icon ?: 'pages') !!}</span>
+                        {{ $navigation->title($item) }}
+                    </a>
+                @endforeach
             </div>
         </div>
 

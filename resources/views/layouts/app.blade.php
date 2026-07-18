@@ -8,6 +8,10 @@
 
     <title>{{ $title ?? 'Dashboard' }} | NPNHCREATIVE</title>
 
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -57,8 +61,8 @@
             });
 
             Alpine.store('sidebar', {
-                // Initialize based on screen size
-                isExpanded: window.innerWidth >= 1280, // true for desktop, false for mobile
+                // Initialize based on screen size: desktop (>=1280) expanded, tablet/laptop (>=768) mini rail, mobile hidden
+                isExpanded: window.innerWidth >= 1280,
                 isMobileOpen: false,
                 isHovered: false,
 
@@ -78,8 +82,8 @@
                 },
 
                 setHovered(val) {
-                    // Only allow hover effects on desktop when sidebar is collapsed
-                    if (window.innerWidth >= 1280 && !this.isExpanded) {
+                    // Only allow hover-to-preview once the sidebar is at least the visible mini rail (>=768) and collapsed
+                    if (window.innerWidth >= 768 && !this.isExpanded) {
                         this.isHovered = val;
                     }
                 }
@@ -114,8 +118,11 @@
     x-data="{ 'loaded': true}"
     x-init="$store.sidebar.isExpanded = window.innerWidth >= 1280;
     const checkMobile = () => {
-        if (window.innerWidth < 1280) {
+        if (window.innerWidth < 768) {
             $store.sidebar.setMobileOpen(false);
+            $store.sidebar.isExpanded = false;
+        } else if (window.innerWidth < 1280) {
+            $store.sidebar.isMobileOpen = false;
             $store.sidebar.isExpanded = false;
         } else {
             $store.sidebar.isMobileOpen = false;
@@ -134,8 +141,8 @@
 
         <div class="flex-1 transition-all duration-300 ease-in-out"
             :class="{
-                'xl:ml-[290px]': $store.sidebar.isExpanded || $store.sidebar.isHovered,
-                'xl:ml-[90px]': !$store.sidebar.isExpanded && !$store.sidebar.isHovered,
+                'md:ml-[290px]': $store.sidebar.isExpanded || $store.sidebar.isHovered,
+                'md:ml-[90px]': !$store.sidebar.isExpanded && !$store.sidebar.isHovered,
                 'ml-0': $store.sidebar.isMobileOpen
             }">
             <!-- app header start -->

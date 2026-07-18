@@ -8,15 +8,25 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\AudioFile;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminConversionController extends Controller
 {
-    public function history(): View
+    public function history(Request $request): View
     {
         return view('pages.admin.history', [
             'title' => 'Conversion Management',
-            'files' => AudioFile::query()->with(['user', 'preset'])->latest()->paginate(10),
+            'files' => AudioFile::query()
+                ->with(['user', 'preset'])
+                ->when($request->string('search')->toString(), function ($query, $search): void {
+                    $query->where(fn ($q) => $q->where('original_name', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")));
+                })
+                ->when($request->string('status')->toString(), fn ($query, $status) => $query->where('status', $status))
+                ->latest()
+                ->paginate(10)
+                ->withQueryString(),
         ]);
     }
 
@@ -38,11 +48,20 @@ class AdminConversionController extends Controller
         ]);
     }
 
-    public function activity(): View
+    public function activity(Request $request): View
     {
         return view('pages.admin.activity', [
             'title' => 'Activity Log',
-            'logs' => ActivityLog::query()->latest()->paginate(20),
+            'logs' => ActivityLog::query()
+                ->with('user')
+                ->when($request->string('event')->toString(), fn ($query, $event) => $query->where('event', 'like', "%{$event}%"))
+                ->when($request->string('user')->toString(), function ($query, $user): void {
+                    $query->whereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$user}%")->orWhere('email', 'like', "%{$user}%"));
+                })
+                ->when($request->date('date'), fn ($query, $date) => $query->whereDate('created_at', $date))
+                ->latest()
+                ->paginate(20)
+                ->withQueryString(),
         ]);
     }
 }

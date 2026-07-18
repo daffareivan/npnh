@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <div class="grid gap-4 xl:grid-cols-5">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         @foreach($dashboard['kpis'] as $kpi)
             <article class="group rounded-[24px] border border-white/[0.07] bg-[#0b0b0d] p-5 shadow-[0_20px_80px_rgba(0,0,0,.32)] transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_30px_110px_rgba(139,92,246,.12)]">
                 <div class="flex items-center justify-between">
@@ -38,7 +38,7 @@
         @endforeach
     </div>
 
-    <div class="mt-6 grid gap-6 xl:grid-cols-[1.15fr_.85fr_420px]">
+    <div class="mt-6 grid gap-6 lg:grid-cols-2 xl:grid-cols-[1.15fr_.85fr_420px]">
         <section class="rounded-[28px] border border-white/[0.07] bg-[#0b0b0d] p-6 shadow-[0_20px_90px_rgba(0,0,0,.30)]">
             <div class="flex items-center justify-between">
                 <div>
@@ -78,7 +78,7 @@
         </section>
     </div>
 
-    <div class="mt-6 grid gap-6 xl:grid-cols-3">
+    <div class="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <section class="rounded-[28px] border border-white/[0.07] bg-[#0b0b0d] p-6 shadow-[0_20px_90px_rgba(0,0,0,.30)]">
             <p class="text-sm text-[#A3A3A3]">{{ __('admin.conversion_analytics') }}</p>
             <div id="conversionChart" class="mt-4 min-h-72"></div>
@@ -96,7 +96,7 @@
     <div class="mt-6 grid gap-6 xl:grid-cols-2">
         <section class="rounded-[28px] border border-white/[0.07] bg-[#0b0b0d] p-6">
             <h2 class="text-lg font-semibold text-white">{{ __('admin.top_users') }}</h2>
-            <div class="mt-5 overflow-x-auto">
+            <div class="mt-5 hidden overflow-x-auto xl:block">
                 <table class="min-w-full text-sm">
                     <thead class="border-b border-white/[0.06] text-left text-xs uppercase tracking-[0.16em] text-[#6B7280]">
                         <tr><th class="py-3">{{ __('admin.user') }}</th><th>{{ __('admin.plan') }}</th><th>{{ __('common.credits') }}</th><th>{{ __('admin.downloads') }}</th><th>{{ __('admin.conversions') }}</th><th>{{ __('admin.roblox') }}</th><th>{{ __('admin.last_login') }}</th></tr>
@@ -118,11 +118,34 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="mt-5 grid gap-3 xl:hidden">
+                @forelse($dashboard['tables']['topUsers'] as $user)
+                    <div class="rounded-2xl border border-white/[0.06] bg-black/20 p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="grid size-9 shrink-0 place-items-center rounded-full bg-white/10 text-xs text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-white">{{ $user->name }}</p>
+                                <p class="truncate text-xs text-[#A3A3A3]">{{ $user->email }}</p>
+                            </div>
+                            <span class="shrink-0 text-xs text-[#A3A3A3]">{{ $user->activeSubscription?->plan?->name ?? 'Free' }}</span>
+                        </div>
+                        <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-[#A3A3A3]">
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('common.credits') }}</dt><dd class="mt-0.5 text-white">{{ number_format($user->credits_balance) }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.downloads') }}</dt><dd class="mt-0.5 text-white/80">{{ number_format($user->downloads_count) }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.conversions') }}</dt><dd class="mt-0.5 text-white/80">{{ number_format($user->conversions_count) }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.roblox') }}</dt><dd class="mt-0.5 text-white/80">{{ number_format($user->roblox_uploads_count) }}</dd></div>
+                        </dl>
+                    </div>
+                @empty
+                    <p class="py-10 text-center text-[#A3A3A3]">{{ __('admin.no_users') }}</p>
+                @endforelse
+            </div>
         </section>
 
         <section class="rounded-[28px] border border-white/[0.07] bg-[#0b0b0d] p-6">
             <h2 class="text-lg font-semibold text-white">{{ __('admin.latest_conversions') }}</h2>
-            <div class="mt-5 overflow-x-auto">
+            <div class="mt-5 hidden overflow-x-auto xl:block">
                 <table class="min-w-full text-sm">
                     <thead class="border-b border-white/[0.06] text-left text-xs uppercase tracking-[0.16em] text-[#6B7280]">
                         <tr><th class="py-3">{{ __('admin.user') }}</th><th>{{ __('admin.file') }}</th><th>{{ __('admin.speed') }}</th><th>{{ __('admin.duration') }}</th><th>{{ __('common.download') }}</th><th>{{ __('admin.roblox') }}</th><th>{{ __('common.status') }}</th><th>{{ __('common.created_at') }}</th></tr>
@@ -145,13 +168,32 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="mt-5 grid gap-3 xl:hidden">
+                @forelse($dashboard['tables']['latestConversions'] as $file)
+                    <div class="rounded-2xl border border-white/[0.06] bg-black/20 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <p class="min-w-0 flex-1 truncate text-sm font-medium text-white">{{ $file->original_name }}</p>
+                            <span class="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-xs">{{ $file->status->value }}</span>
+                        </div>
+                        <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-[#A3A3A3]">
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.user') }}</dt><dd class="mt-0.5 text-white/80">{{ $file->user?->name ?? '-' }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.speed') }}</dt><dd class="mt-0.5 text-white/80">{{ $file->speed }}x</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.duration') }}</dt><dd class="mt-0.5 text-white/80">{{ $file->duration ? number_format((float) $file->duration, 1).'s' : '-' }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.roblox') }}</dt><dd class="mt-0.5 text-white/80">{{ $file->roblox_asset_id ? __('admin.uploaded') : ucfirst($file->roblox_status ?? '-') }}</dd></div>
+                        </dl>
+                    </div>
+                @empty
+                    <p class="py-10 text-center text-[#A3A3A3]">{{ __('admin.no_conversions') }}</p>
+                @endforelse
+            </div>
         </section>
     </div>
 
     <div class="mt-6 grid gap-6 xl:grid-cols-[1fr_420px]">
         <section class="rounded-[28px] border border-white/[0.07] bg-[#0b0b0d] p-6">
             <h2 class="text-lg font-semibold text-white">{{ __('admin.recent_payments') }}</h2>
-            <div class="mt-5 overflow-x-auto">
+            <div class="mt-5 hidden overflow-x-auto xl:block">
                 <table class="min-w-full text-sm">
                     <thead class="border-b border-white/[0.06] text-left text-xs uppercase tracking-[0.16em] text-[#6B7280]">
                         <tr><th class="py-3">{{ __('admin.invoice') }}</th><th>{{ __('admin.user') }}</th><th>{{ __('admin.plan') }}</th><th>{{ __('common.credits') }}</th><th>{{ __('admin.amount') }}</th><th>{{ __('admin.method') }}</th><th>{{ __('common.status') }}</th><th>{{ __('admin.date') }}</th></tr>
@@ -173,6 +215,26 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-5 grid gap-3 xl:hidden">
+                @forelse($dashboard['tables']['recentPayments'] as $order)
+                    <div class="rounded-2xl border border-white/[0.06] bg-black/20 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <p class="font-medium text-white">{{ $order->order_number }}</p>
+                            <span class="shrink-0 text-xs text-[#A3A3A3]">{{ ucfirst($order->payment_status) }}</span>
+                        </div>
+                        <p class="mt-1 text-sm text-[#A3A3A3]">{{ $order->user?->email ?? '-' }}</p>
+                        <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-[#A3A3A3]">
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.plan') }}</dt><dd class="mt-0.5 text-white/80">{{ $order->plan?->name ?? '-' }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.amount') }}</dt><dd class="mt-0.5 text-white">{{ $money($order->amount) }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.method') }}</dt><dd class="mt-0.5 text-white/80">{{ $order->payment_method ?? 'manual' }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">{{ __('admin.date') }}</dt><dd class="mt-0.5 text-white/80">{{ ($order->paid_at ?? $order->created_at)->format('M d, Y') }}</dd></div>
+                        </dl>
+                    </div>
+                @empty
+                    <p class="py-10 text-center text-[#A3A3A3]">{{ __('admin.no_payments') }}</p>
+                @endforelse
             </div>
         </section>
 

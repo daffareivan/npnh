@@ -19,16 +19,16 @@
         document.addEventListener('alpine:init', () => {
             Alpine.store('theme', {
                 init() {
-                    const savedTheme = localStorage.getItem('theme');
+                    const savedTheme = localStorage.getItem('npnhcreative_theme') || @json($currentTheme ?? 'system');
                     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' :
                         'light';
-                    this.theme = savedTheme || systemTheme;
+                    this.theme = savedTheme === 'system' ? systemTheme : savedTheme;
                     this.updateTheme();
                 },
                 theme: 'light',
                 toggle() {
                     this.theme = this.theme === 'light' ? 'dark' : 'light';
-                    localStorage.setItem('theme', this.theme);
+                    localStorage.setItem('npnhcreative_theme', this.theme);
                     this.updateTheme();
                 },
                 updateTheme() {
@@ -78,9 +78,9 @@
     <!-- Apply dark mode immediately to prevent flash -->
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('theme');
+            const savedTheme = localStorage.getItem('npnhcreative_theme') || @json($currentTheme ?? 'system');
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            const theme = savedTheme || systemTheme;
+            const theme = savedTheme === 'system' ? systemTheme : savedTheme;
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.body.classList.add('dark', 'bg-gray-900');

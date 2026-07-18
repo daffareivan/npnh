@@ -11,6 +11,8 @@
     <meta property="og:url" content="{{ route('home') }}">
     <meta property="og:type" content="website">
     <title>{{ __('homepage.meta_title') }}</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <script>
         (() => {
             const savedTheme = localStorage.getItem('npnhcreative_theme') || @json($currentTheme ?? 'system');
@@ -65,20 +67,20 @@
     <header class="fixed inset-x-0 top-0 z-50 transition-all duration-300" :class="scrolled ? 'border-b shadow-2xl backdrop-blur-xl' : 'bg-transparent'" :style="scrolled ? 'background: color-mix(in srgb, var(--topbar) 82%, transparent); border-color: var(--border); box-shadow: 0 18px 60px var(--shadow);' : ''">
         <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Main navigation">
             <a href="{{ route('home') }}" class="group flex items-center gap-3">
-                <span class="wx-pill grid size-10 place-items-center rounded-2xl transition">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 11v2"/><path d="M7 7v10"/><path d="M11 4v16"/><path d="M15 8v8"/><path d="M19 10v4"/></svg>
+                <span class="wx-pill grid size-10 place-items-center overflow-hidden rounded-2xl transition">
+                    <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-cover">
                 </span>
                 <span class="text-base font-semibold tracking-tight">NPNHCREATIVE</span>
             </a>
 
-            <div class="hidden items-center gap-7 text-sm md:flex" style="color: var(--muted-foreground);">
+            <div class="hidden items-center gap-7 text-sm lg:flex" style="color: var(--muted-foreground);">
                 @foreach(__('homepage.nav') as $key => $label)
                     @php($href = $key === 'documentation' ? route('app.documentation') : '#'.($key === 'home' ? 'home' : $key))
                     <a href="{{ $href }}" class="transition hover:text-[var(--foreground)]">{{ $label }}</a>
                 @endforeach
             </div>
 
-            <div class="hidden items-center gap-3 md:flex">
+            <div class="hidden items-center gap-3 lg:flex">
                 @if($allowThemeSwitch ?? true)
                     <div class="relative" x-data="{ open: false }" @click.away="open = false">
                         <button @click="open = !open" class="wx-icon-button grid size-10 place-items-center rounded-full" type="button" aria-label="{{ __('ui.theme') }}">
@@ -119,11 +121,11 @@
                 <a href="{{ route('signup') }}" class="wx-btn-primary px-4 py-2.5 text-sm">{{ __('homepage.get_started') }}</a>
             </div>
 
-            <button class="wx-icon-button grid size-10 place-items-center rounded-2xl md:hidden" @click="menu = !menu" aria-label="Open menu">
+            <button class="wx-icon-button grid size-10 place-items-center rounded-2xl lg:hidden" @click="menu = !menu" aria-label="Open menu">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
             </button>
         </nav>
-        <div x-show="menu" x-transition class="wx-menu-popover mx-4 mb-4 rounded-3xl p-4 md:hidden">
+        <div x-show="menu" x-transition class="wx-menu-popover mx-4 mb-4 rounded-3xl p-4 lg:hidden">
             <div class="grid gap-2 text-sm" style="color: var(--muted-foreground);">
                 @foreach(__('homepage.nav') as $key => $label)
                     @php($href = $key === 'documentation' ? route('app.documentation') : '#'.($key === 'home' ? 'home' : $key))
@@ -160,8 +162,8 @@
     </header>
 
     <main id="home" class="overflow-hidden">
-        <section class="relative mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-4 pb-20 pt-32 sm:px-6 lg:grid-cols-[1fr_500px] lg:px-8">
-            <div class="pointer-events-none absolute inset-x-0 top-0 h-[44rem]" style="background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary) 13%, transparent), transparent 36rem);"></div>
+        <section class="relative mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-4 pb-20 pt-32 sm:px-6 md:grid-cols-2 lg:grid-cols-[1fr_500px] lg:px-8">
+            <div class="wx-decor-glow pointer-events-none absolute inset-x-0 top-0 h-[44rem]" style="background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary) 13%, transparent), transparent 36rem);"></div>
             <div class="wx-reveal wx-page-slide-up">
                 <span class="wx-pill inline-flex rounded-full px-4 py-2 text-sm font-medium">{{ __('homepage.hero_badge') }}</span>
                 <h1 class="mt-7 max-w-4xl text-5xl font-semibold tracking-[-0.045em] sm:text-6xl lg:text-7xl" style="color: var(--foreground);">{!! __('homepage.hero_title') !!}</h1>
@@ -214,7 +216,7 @@
                     <h2 class="mt-6 text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">{{ __('homepage.features_title') }}</h2>
                     <p class="mx-auto mt-5 max-w-2xl text-sm leading-7" style="color: var(--muted-foreground);">{{ __('homepage.features_copy') }}</p>
                 </div>
-                <div class="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div class="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     @foreach([
                         [__('homepage.features.fast.title'), __('homepage.features.fast.copy'), 'M13 2 4 14h7l-1 8 10-13h-7V2Z', [18, 36, 54, 34, 72, 44, 62, 30]],
                         [__('homepage.features.formats.title'), __('homepage.features.formats.copy'), 'M9 18V5l12-2v13M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm12-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', [30, 44, 38, 68, 50, 74, 40, 56]],
@@ -309,7 +311,7 @@
                 <h2 class="text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">{!! __('homepage.pricing_title') !!}</h2>
                 <p class="mx-auto mt-4 max-w-2xl text-sm text-[#A3A3A3]">{{ __('homepage.pricing_copy') }}</p>
             </div>
-            <div class="mt-10 grid gap-4 md:grid-cols-4">
+            <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach($plans as $i => $plan)
                     <div class="wx-hover-lift relative overflow-hidden rounded-[22px] border border-white/[0.07] bg-[#0b0b0d] p-7 {{ $plan->slug === 'standard' ? 'bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,.28),rgba(11,11,13,1)_58%)]' : '' }}">
                         @foreach([$plan->slug === 'standard' ? __('homepage.most_popular') : null, $plan->slug === 'premium' ? __('homepage.best_value') : null] as $badge)
@@ -332,7 +334,7 @@
 
         <section id="reviews" class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8" x-data="{ filter: 'all' }">
             <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_8%,rgba(168,85,247,.16),transparent_24rem),radial-gradient(circle_at_88%_36%,rgba(59,130,246,.12),transparent_22rem)]"></div>
-            <div class="mb-10 grid gap-4 md:grid-cols-4">
+            <div class="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach([
                     [\Illuminate\Support\Number::abbreviate($homepageStats['converted']), __('homepage.reviews_stats.converted')],
                     [\Illuminate\Support\Number::abbreviate($homepageStats['users']), __('homepage.reviews_stats.users')],
@@ -381,12 +383,12 @@
                 @endforeach
             </div>
 
-            <div class="flex snap-x gap-5 overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:overflow-visible">
+            <div class="flex snap-x gap-5 overflow-x-auto pb-4 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
                 @forelse($homepageReviews as $review)
                         <article
                             x-show="filter === 'all' || filter === '{{ $review->rating }}' || '{{ $review->homepage_badge_slugs }}'.includes(filter)"
                             x-transition
-                            class="min-w-[86%] snap-start rounded-[28px] border border-white/[0.08] bg-[#0b0b0d]/92 p-6 shadow-[0_24px_90px_rgba(0,0,0,.38)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-white/25 hover:shadow-[0_30px_110px_rgba(168,85,247,.15)] sm:min-w-[420px] lg:min-w-0"
+                            class="min-w-[86%] snap-start rounded-[28px] border border-white/[0.08] bg-[#0b0b0d]/92 p-6 shadow-[0_24px_90px_rgba(0,0,0,.38)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-white/25 hover:shadow-[0_30px_110px_rgba(168,85,247,.15)] sm:min-w-0"
                         >
                             <div class="flex items-start gap-4">
                                 <div class="group/avatar relative shrink-0">
@@ -488,8 +490,8 @@
     </main>
 
     <footer class="border-t border-white/8 px-4 py-12 sm:px-6 lg:px-8">
-        <div class="mx-auto grid max-w-7xl gap-8 md:grid-cols-5">
-            <div class="md:col-span-2"><p class="font-semibold">NPNHCREATIVE</p><p class="mt-2 max-w-sm text-sm text-[#A3A3A3]">{{ __('homepage.footer_copy') }}</p></div>
+        <div class="mx-auto grid max-w-7xl gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+            <div class="sm:col-span-2 md:col-span-3 lg:col-span-2"><p class="font-semibold">NPNHCREATIVE</p><p class="mt-2 max-w-sm text-sm text-[#A3A3A3]">{{ __('homepage.footer_copy') }}</p></div>
             @foreach(__('homepage.footer_groups') as $title => $links)
                 <div>
                     <p class="font-medium">{{ $title }}</p>

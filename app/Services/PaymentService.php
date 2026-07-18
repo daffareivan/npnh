@@ -8,13 +8,17 @@ use App\Models\Order;
 
 class PaymentService
 {
+    public function __construct(private readonly MidtransService $midtrans) {}
+
     public function checkoutUrl(Order $order): string
     {
-        return route('app.orders.show', $order);
+        $transaction = $this->midtrans->createSnapTransaction($order);
+
+        return $transaction->redirect_url ?? route('app.orders.show', $order);
     }
 
     public function providerName(): string
     {
-        return 'manual';
+        return 'midtrans';
     }
 }

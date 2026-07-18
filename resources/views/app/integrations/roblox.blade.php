@@ -33,20 +33,20 @@
                 </div>
 
                 @if($account)
-                    <div class="flex flex-wrap gap-3">
-                        <a href="https://www.roblox.com/users/{{ $account->roblox_user_id }}/profile" target="_blank" rel="noopener" class="wx-btn-secondary px-5 py-3">View Profile</a>
+                    <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
+                        <a href="https://www.roblox.com/users/{{ $account->roblox_user_id }}/profile" target="_blank" rel="noopener" class="wx-btn-secondary w-full px-5 py-3 text-center sm:w-auto">View Profile</a>
                         <form method="POST" action="{{ route('roblox.switch') }}">
                             @csrf
-                            <button class="wx-btn-primary px-5 py-3">Switch Account</button>
+                            <button class="wx-btn-primary w-full px-5 py-3 sm:w-auto">Switch Account</button>
                         </form>
                         <form method="POST" action="{{ route('roblox.disconnect') }}">
                             @csrf
                             @method('DELETE')
-                            <button class="rounded-full border border-rose-400/20 bg-rose-400/10 px-5 py-3 text-sm font-semibold text-rose-200 transition hover:bg-rose-400/15">Disconnect</button>
+                            <button class="w-full rounded-full border border-rose-400/20 bg-rose-400/10 px-5 py-3 text-sm font-semibold text-rose-200 transition hover:bg-rose-400/15 sm:w-auto">Disconnect</button>
                         </form>
                     </div>
                 @else
-                    <a href="{{ route('roblox.connect') }}" class="wx-btn-primary px-5 py-3">Connect Roblox</a>
+                    <a href="{{ route('roblox.connect') }}" class="wx-btn-primary block px-5 py-3 text-center sm:inline-block sm:w-auto">Connect Roblox</a>
                 @endif
             </div>
 

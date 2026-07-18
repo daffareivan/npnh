@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? __('auth.title') }} | NPNHCREATIVE</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <script>
         (() => {
             const savedTheme = localStorage.getItem('npnhcreative_theme') || @json($currentTheme ?? 'system');
@@ -55,7 +57,7 @@
             ];
         });
     @endphp
-    <div class="wx-auth-controls fixed right-5 top-5 z-50 hidden items-center gap-2 rounded-full p-1.5 lg:flex">
+    <div class="wx-auth-controls fixed right-5 top-5 z-50 hidden items-center gap-2 rounded-full p-1.5 md:flex">
         @if($allowThemeSwitch ?? true)
             <div class="relative" x-data="{ open: false }" @click.away="open = false">
                 <button @click="open = !open" class="wx-icon-button grid size-10 place-items-center rounded-full" type="button" aria-label="{{ __('ui.theme') }}">
@@ -93,16 +95,16 @@
         @endif
     </div>
 
-    <main class="grid min-h-screen lg:grid-cols-[1fr_520px]">
-        <section class="relative hidden overflow-hidden p-10 lg:flex lg:flex-col lg:justify-between">
-            <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(168,85,247,.24),transparent_28rem),radial-gradient(circle_at_76%_68%,rgba(59,130,246,.20),transparent_26rem),radial-gradient(circle_at_42%_92%,rgba(16,185,129,.10),transparent_24rem)]"></div>
-            <div class="pointer-events-none absolute -left-32 top-24 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl"></div>
-            <div class="pointer-events-none absolute -right-28 bottom-20 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl"></div>
-            <div class="pointer-events-none absolute inset-0 opacity-[.07] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:22px_22px]"></div>
+    <main class="grid min-h-screen md:grid-cols-[1fr_1fr] lg:grid-cols-[1fr_520px]">
+        <section class="relative hidden overflow-hidden p-6 md:flex md:flex-col md:justify-between lg:p-10">
+            <div class="wx-decor-glow pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(168,85,247,.24),transparent_28rem),radial-gradient(circle_at_76%_68%,rgba(59,130,246,.20),transparent_26rem),radial-gradient(circle_at_42%_92%,rgba(16,185,129,.10),transparent_24rem)]"></div>
+            <div class="wx-decor-glow pointer-events-none absolute -left-32 top-24 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl"></div>
+            <div class="wx-decor-glow pointer-events-none absolute -right-28 bottom-20 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl"></div>
+            <div class="wx-decor-glow pointer-events-none absolute inset-0 opacity-[.07] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:22px_22px]"></div>
             <div class="relative z-20 flex items-center justify-between gap-4">
             <a href="{{ route('home') }}" class="flex items-center gap-3">
-                <span class="grid size-11 place-items-center rounded-2xl border border-white/10 bg-white/[0.05] text-white">
-                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
+                <span class="grid size-11 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] text-white">
+                    <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-cover">
                 </span>
                 <span class="font-semibold">NPNHCREATIVE</span>
             </a>
@@ -146,21 +148,21 @@
             </div>
             <div class="relative z-10 max-w-2xl wx-reveal">
                 <p class="mb-5 inline-flex rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-white">{{ __('auth.tagline') }}</p>
-                <h1 class="text-6xl font-semibold tracking-[-0.05em]">{{ __('auth.hero_title') }}</h1>
+                <h1 class="text-4xl font-semibold tracking-[-0.05em] lg:text-6xl">{{ __('auth.hero_title') }}</h1>
                 <p class="mt-6 text-lg leading-8 text-[#A3A3A3]">{{ __('auth.hero_copy') }}</p>
                 <div class="mt-8 grid gap-3 text-sm text-[#E5E5E5] sm:grid-cols-2">
                     @foreach(__('auth.benefits') as $benefit)
                         <p class="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><svg class="size-4 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"/></svg><span>{{ $benefit }}</span></p>
                     @endforeach
                 </div>
-                <div class="mt-8 grid grid-cols-3 gap-3">
+                <div class="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3">
                     @foreach([
                         [\Illuminate\Support\Number::abbreviate($authStats['converted']), __('auth.converted')],
                         [\Illuminate\Support\Number::abbreviate($authStats['users']), __('auth.creators')],
                         [\Illuminate\Support\Number::abbreviate($authStats['credits']), __('auth.credits_used')],
                     ] as [$value, $label])
                         <div class="rounded-3xl border border-white/10 bg-white/[0.055] p-5 shadow-[0_18px_60px_rgba(0,0,0,.22)] backdrop-blur">
-                            <p class="text-4xl font-semibold tracking-[-0.05em] text-white">{{ $value }}</p>
+                            <p class="text-3xl font-semibold tracking-[-0.05em] text-white lg:text-4xl">{{ $value }}</p>
                             <p class="mt-1 text-xs text-[#A3A3A3]">{{ $label }}</p>
                         </div>
                     @endforeach
@@ -180,7 +182,7 @@
                             <span class="wx-wave-bar w-full rounded-full bg-white/70 transition duration-500 hover:bg-white" style="height: {{ $height }}px; animation-delay: {{ $loop->index * 90 }}ms"></span>
                         @endforeach
                     </div>
-                    <div class="mt-5 grid grid-cols-5 gap-2 text-center text-xs text-[#A3A3A3]">
+                    <div class="mt-5 grid grid-cols-2 gap-2 text-center text-xs text-[#A3A3A3] lg:grid-cols-5">
                         @foreach([
                             [__('auth.upload'), 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4|M17 8l-5-5-5 5|M12 3v12'],
                             ['2.3x', 'M4 18V6|M8 18V10|M12 18V4|M16 18v-8|M20 18V7'],
@@ -199,21 +201,21 @@
                         @endforeach
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 gap-3 lg:grid-cols-3">
                     <div class="rounded-2xl border border-white/10 bg-white/[0.045] p-4">
                         <p class="text-xs text-[#A3A3A3]">{{ __('auth.active_preset') }}</p>
-                        <p class="mt-2 text-2xl font-semibold text-white">2.3x</p>
+                        <p class="mt-2 text-xl font-semibold text-white lg:text-2xl">2.3x</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.045] p-4">
                         <p class="text-xs text-[#A3A3A3]">{{ __('auth.status') }}</p>
                         <p class="mt-2 flex items-center gap-2 text-sm font-semibold text-emerald-200">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
                             {{ __('auth.uploaded_successfully') }}
                         </p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.045] p-4">
                         <p class="text-xs text-[#A3A3A3]">{{ __('auth.credits_remaining') }}</p>
-                        <p class="mt-2 text-2xl font-semibold text-white">250</p>
+                        <p class="mt-2 text-xl font-semibold text-white lg:text-2xl">250</p>
                     </div>
                 </div>
             </div>
@@ -221,8 +223,8 @@
 
         <section class="flex items-center justify-center px-4 py-10 sm:px-6">
             <div class="w-full max-w-md">
-                <div class="mb-8 flex items-center justify-between gap-3 lg:hidden">
-                    <a href="{{ route('home') }}" class="flex items-center gap-3"><span class="wx-pill grid size-10 place-items-center rounded-2xl"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg></span><span class="font-semibold">NPNHCREATIVE</span></a>
+                <div class="mb-8 flex items-center justify-between gap-3 md:hidden">
+                    <a href="{{ route('home') }}" class="flex items-center gap-3"><span class="wx-pill grid size-10 place-items-center overflow-hidden rounded-2xl"><img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-cover"></span><span class="font-semibold">NPNHCREATIVE</span></a>
                     <div class="flex items-center gap-2">
                         @if($allowThemeSwitch ?? true)
                             <form method="POST" action="{{ route('preferences.theme') }}">

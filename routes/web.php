@@ -19,8 +19,11 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -28,6 +31,7 @@ Route::view('/privacy', 'legal.privacy', ['title' => __('legal.privacy_policy')]
 Route::view('/terms', 'legal.terms', ['title' => __('legal.terms_of_service')])->name('terms');
 Route::post('/preferences/theme', [PreferenceController::class, 'theme'])->name('preferences.theme');
 Route::post('/preferences/locale', [PreferenceController::class, 'locale'])->name('preferences.locale');
+Route::post('/payment/midtrans/callback', [WebhookController::class, 'midtrans'])->name('payment.midtrans.callback');
 
 Route::middleware('guest')->group(function (): void {
     Route::redirect('/login', '/signin')->name('login');
@@ -78,6 +82,15 @@ Route::middleware(['auth', 'active', 'verified.config', 'role:user|admin', 'perm
     Route::get('/profile', [UserAppController::class, 'profile'])->name('profile');
 });
 
+Route::middleware(['auth', 'active', 'verified.config'])->group(function (): void {
+    Route::post('/payment/create', [PaymentController::class, 'create'])->name('payment.create');
+    Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/pending', [PaymentController::class, 'pending'])->name('payment.pending');
+    Route::get('/payment/failed', [PaymentController::class, 'failed'])->name('payment.failed');
+    Route::get('/user/payment/history', [InvoiceController::class, 'paymentHistory'])->name('payment.history');
+    Route::get('/user/invoices', [InvoiceController::class, 'invoices'])->name('payment.invoices');
+});
+
 Route::middleware(['auth', 'active', 'verified.config'])->prefix('integrations/roblox')->name('roblox.')->group(function (): void {
     Route::get('/connect', [RobloxIntegrationController::class, 'redirect'])->middleware('throttle:6,1')->name('connect');
     Route::post('/switch', [RobloxIntegrationController::class, 'switch'])->middleware('throttle:6,1')->name('switch');
@@ -92,6 +105,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])->name('dashboard.show');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+    Route::post('/users/{user}/credits', [AdminUserController::class, 'addCredits'])->name('users.credits.add');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::get('/history', [AdminConversionController::class, 'history'])->name('history');
     Route::get('/analytics', [AdminConversionController::class, 'analytics'])->name('analytics');

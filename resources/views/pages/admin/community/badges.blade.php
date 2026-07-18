@@ -30,13 +30,27 @@
                 </select>
                 <button class="wx-btn-secondary px-5">Assign Badge</button>
             </form>
-            <div class="overflow-x-auto">
+            <div class="hidden overflow-x-auto md:block">
                 <table class="min-w-full text-sm">
                     <thead class="border-b border-white/[0.06] text-left text-xs uppercase tracking-[0.14em] text-[#6B7280]"><tr><th class="px-4 py-3">Badge</th><th class="px-4 py-3">Icon</th><th class="px-4 py-3">Color</th><th class="px-4 py-3">Priority</th><th class="px-4 py-3">Rule</th></tr></thead>
                     <tbody class="divide-y divide-white/[0.06]">
                         @foreach($badges as $badge)<tr><td class="px-4 py-3"><x-community.badge :badge="$badge" /></td><td class="px-4 py-3 text-[#A3A3A3]">{{ $badge->icon }}</td><td class="px-4 py-3 text-[#A3A3A3]">{{ $badge->color }}</td><td class="px-4 py-3 text-white">{{ $badge->priority }}</td><td class="px-4 py-3 text-[#A3A3A3]">{{ $badge->auto_assign_rule }}</td></tr>@endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <div class="grid gap-3 md:hidden">
+                @foreach($badges as $badge)
+                    <div class="rounded-2xl border border-white/[0.06] bg-black/20 p-4">
+                        <x-community.badge :badge="$badge" />
+                        <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-[#A3A3A3]">
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">Icon</dt><dd class="mt-0.5 text-white/80">{{ $badge->icon }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">Color</dt><dd class="mt-0.5 text-white/80">{{ $badge->color }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">Priority</dt><dd class="mt-0.5 text-white">{{ $badge->priority }}</dd></div>
+                            <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">Rule</dt><dd class="mt-0.5 text-white/80">{{ $badge->auto_assign_rule ?: '-' }}</dd></div>
+                        </dl>
+                    </div>
+                @endforeach
             </div>
         </x-common.component-card>
     </div>

@@ -16,11 +16,21 @@ use Illuminate\Support\Str;
 
 class CommunityAdminController extends Controller
 {
-    public function reviews(): View
+    public function reviews(Request $request): View
     {
         return view('pages.admin.community.reviews', [
             'title' => 'Community Reviews',
-            'reviews' => Review::query()->with('user.badges')->latest()->paginate(20),
+            'reviews' => Review::query()
+                ->with('user.badges')
+                ->when($request->string('search')->toString(), function ($query, $search): void {
+                    $query->where(fn ($q) => $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('content', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")));
+                })
+                ->when($request->string('status')->toString(), fn ($query, $status) => $query->where('status', $status))
+                ->latest()
+                ->paginate(20)
+                ->withQueryString(),
         ]);
     }
 
@@ -41,11 +51,20 @@ class CommunityAdminController extends Controller
         return back()->with('status', 'Review updated.');
     }
 
-    public function comments(): View
+    public function comments(Request $request): View
     {
         return view('pages.admin.community.comments', [
             'title' => 'Community Comments',
-            'comments' => ReviewComment::query()->with(['user.badges', 'review'])->latest()->paginate(30),
+            'comments' => ReviewComment::query()
+                ->with(['user.badges', 'review'])
+                ->when($request->string('search')->toString(), function ($query, $search): void {
+                    $query->where(fn ($q) => $q->where('content', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")));
+                })
+                ->when($request->string('status')->toString(), fn ($query, $status) => $query->where('status', $status))
+                ->latest()
+                ->paginate(30)
+                ->withQueryString(),
         ]);
     }
 

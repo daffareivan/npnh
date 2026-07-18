@@ -13,6 +13,9 @@ class Plan extends Model
         'slug',
         'price',
         'credits',
+        'badge',
+        'description',
+        'is_active',
         'is_custom',
         'features',
         'status',
@@ -24,6 +27,7 @@ class Plan extends Model
         return [
             'price' => 'integer',
             'credits' => 'integer',
+            'is_active' => 'boolean',
             'is_custom' => 'boolean',
             'features' => 'array',
         ];
@@ -41,7 +45,7 @@ class Plan extends Model
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('status', 'active');
+        return $query->where('status', 'active')->where('is_active', true);
     }
 
     public function scopeOrdered(Builder $query): Builder

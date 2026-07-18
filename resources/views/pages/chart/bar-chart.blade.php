@@ -6,7 +6,7 @@
         <x-common.component-card title="Bar chart 1">
             <!-- ====== Bar Chart One Start -->
             <div class="custom-scrollbar max-w-full overflow-x-auto">
-                <div id="chartOne" class="min-w-[1000px]"></div>
+                <div id="chartOne" class="min-w-[600px] xl:min-w-full"></div>
             </div>
             <!-- ====== Bar Chart One End -->
         </x-common.component-card>
@@ -14,7 +14,7 @@
         <x-common.component-card title="Bar chart 2">
             <!-- ====== Bar Chart Two Start -->
             <div class="custom-scrollbar max-w-full overflow-x-auto">
-                <div id="chartSix" class="min-w-[1000px]"></div>
+                <div id="chartSix" class="min-w-[600px] xl:min-w-full"></div>
             </div>
             <!-- ====== Bar Chart Two End -->
         </x-common.component-card>

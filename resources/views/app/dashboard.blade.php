@@ -69,7 +69,7 @@
             </div>
         </x-wx.section-card>
 
-        <div class="grid gap-10 lg:grid-cols-[1fr_420px] lg:items-center">
+        <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-[1fr_420px] lg:items-center">
             <div>
                 <p class="mb-4 inline-flex rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/80">Roblox-ready OGG conversion</p>
                 <h1 class="max-w-3xl text-5xl font-semibold tracking-tight text-white sm:text-6xl">Convert Roblox Audio Instantly</h1>
@@ -88,7 +88,7 @@
                         </div>
                     @endforeach
                 </div>
-                <div class="mt-5 h-24 rounded-[20px] border border-white/[0.06] bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,.12),transparent_12rem)]"></div>
+                <div class="wx-decor-glow mt-5 h-24 rounded-[20px] border border-white/[0.06] bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,.12),transparent_12rem)]"></div>
             </div>
         </div>
     </section>

@@ -14,15 +14,8 @@
 
         <div class="relative grid place-items-center text-center">
             <div class="wx-intro-glow absolute size-48 rounded-full bg-[#8B5CF6]/15 blur-3xl"></div>
-            <div class="wx-intro-logo relative grid size-24 place-items-center rounded-[28px] border border-white/10 bg-white/[0.055] text-white shadow-[0_24px_100px_rgba(139,92,246,.18)] backdrop-blur">
-                <svg class="size-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                    <path d="M2 10v3"/>
-                    <path d="M6 6v11"/>
-                    <path d="M10 3v18"/>
-                    <path d="M14 8v7"/>
-                    <path d="M18 5v13"/>
-                    <path d="M22 10v3"/>
-                </svg>
+            <div class="wx-intro-logo relative grid size-24 place-items-center overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.055] text-white shadow-[0_24px_100px_rgba(139,92,246,.18)] backdrop-blur">
+                <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-cover">
             </div>
             <h1 class="wx-intro-name mt-6 text-xl font-semibold text-white">NPNHCREATIVE</h1>
             <div class="wx-intro-wave mt-5 flex h-8 items-end gap-1.5">

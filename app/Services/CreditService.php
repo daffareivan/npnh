@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\CreditSetting;
+use App\Models\CreditHistory;
 use App\Models\CreditTransaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -74,9 +75,10 @@ class CreditService
     {
         return DB::transaction(function () use ($user, $amount, $action, $status, $subject, $metadata): CreditTransaction {
             $locked = User::query()->lockForUpdate()->findOrFail($user->id);
+            $balanceBefore = $locked->credits_balance;
             $locked->forceFill(['credits_balance' => $locked->credits_balance + $amount])->save();
 
-            return CreditTransaction::query()->create([
+            $transaction = CreditTransaction::query()->create([
                 'user_id' => $locked->id,
                 'subject_type' => $subject?->getMorphClass(),
                 'subject_id' => $subject?->getKey(),
@@ -86,6 +88,18 @@ class CreditService
                 'status' => $status,
                 'metadata' => $metadata,
             ]);
+
+            CreditHistory::query()->create([
+                'user_id' => $locked->id,
+                'payment_transaction_id' => $metadata['payment_transaction_id'] ?? null,
+                'type' => $amount < 0 ? 'debit' : 'credit',
+                'credits' => $amount,
+                'balance_before' => $balanceBefore,
+                'balance_after' => $locked->credits_balance,
+                'description' => $action,
+            ]);
+
+            return $transaction;
         });
     }
 }

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I{} sh -c 'echo \"--- {} ---\"; head -5 \"{}\"')",
+      "Bash(npx --no-install playwright --version)",
+      "Bash(node -e \"try{require.resolve\\('playwright'\\);console.log\\('playwright available'\\)}catch\\(e\\){console.log\\('no playwright'\\)}\")",
+      "Bash(tail -40 /tmp/artisan-serve.log)",
+      "Read(//tmp/**)",
+      "Bash(taskkill //F //PID 30336)",
+      "Bash(netstat -ano)",
+      "Bash(awk '{print $2}')",
+      "Bash(npx --no-install vite build)",
+      "Bash(taskkill //F //PID 16976)"
+    ]
+  }
+}

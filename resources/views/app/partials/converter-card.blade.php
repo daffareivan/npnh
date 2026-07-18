@@ -1,5 +1,5 @@
 <div x-data="wxConverter({ presets: @js($presets), defaultPresetId: {{ $defaultPreset?->id ?? $presets->first()?->id }}, creditBalance: {{ $creditBalance ?? auth()->user()?->credits_balance ?? 0 }}, downloadCost: {{ $downloadCost ?? 1 }}, robloxUploadCost: {{ $robloxUploadCost ?? 2 }} })" class="relative overflow-hidden rounded-[28px] border border-white/[0.05] bg-[#111214] p-5 shadow-[0_10px_60px_rgba(0,0,0,.35)] sm:p-8">
-    <div class="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,.08),transparent_18rem)]"></div>
+    <div class="wx-decor-glow pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,.08),transparent_18rem)]"></div>
 
     <div class="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -70,10 +70,10 @@
                 </div>
             </template>
         </div>
-        <div class="mt-5 flex flex-wrap gap-3">
-            <button x-show="creditBalance >= downloadCost" type="button" @click="downloadResult" :disabled="downloading" class="wx-btn-primary px-4 py-2.5 text-sm" x-text="downloading ? 'Downloading...' : `Download (-${downloadCost} Credit)`"></button>
-            <button x-show="creditBalance < downloadCost" type="button" disabled class="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-[#6B7280]">Download - Insufficient Credits</button>
-            <button type="button" @click="reset" class="wx-btn-secondary px-4 py-2.5 text-sm">Convert Again</button>
+        <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
+            <button x-show="creditBalance >= downloadCost" type="button" @click="downloadResult" :disabled="downloading" class="wx-btn-primary w-full px-4 py-2.5 text-sm sm:w-auto" x-text="downloading ? 'Downloading...' : `Download (-${downloadCost} Credit)`"></button>
+            <button x-show="creditBalance < downloadCost" type="button" disabled class="w-full rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-[#6B7280] sm:w-auto">Download - Insufficient Credits</button>
+            <button type="button" @click="reset" class="wx-btn-secondary w-full px-4 py-2.5 text-sm sm:w-auto">Convert Again</button>
         </div>
         <p x-show="downloadMessage" class="mt-3 text-sm text-[#A3A3A3]" x-text="downloadMessage"></p>
         @auth
@@ -94,15 +94,15 @@
                             <p class="mt-1 text-sm text-[#A3A3A3]">Please connect your Roblox account first.</p>
                         @endif
                     </div>
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                         @if(auth()->user()->robloxAccount)
-                            <button x-show="creditBalance >= robloxUploadCost" type="button" @click="uploadToRoblox" class="wx-btn-primary px-4 py-2.5 text-sm" :disabled="robloxUploading" x-text="robloxUploading ? 'Uploading...' : `Upload to Roblox (-${robloxUploadCost} Credits)`"></button>
-                            <button x-show="creditBalance < robloxUploadCost" type="button" disabled class="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-[#6B7280]">Upload - Insufficient Credits</button>
-                            <a x-show="result?.roblox_creator_url" :href="result?.roblox_creator_url" target="_blank" rel="noopener" class="wx-btn-secondary px-4 py-2.5 text-sm">Open Creator Hub</a>
-                            <button x-show="result?.id" type="button" @click="refreshResultStatus" class="wx-btn-secondary px-4 py-2.5 text-sm">Refresh Status</button>
-                            <button x-show="result?.roblox_asset_id" type="button" @click="navigator.clipboard.writeText(result.roblox_asset_id)" class="wx-btn-secondary px-4 py-2.5 text-sm">Copy Asset ID</button>
+                            <button x-show="creditBalance >= robloxUploadCost" type="button" @click="uploadToRoblox" class="wx-btn-primary w-full px-4 py-2.5 text-sm sm:w-auto" :disabled="robloxUploading" x-text="robloxUploading ? 'Uploading...' : `Upload to Roblox (-${robloxUploadCost} Credits)`"></button>
+                            <button x-show="creditBalance < robloxUploadCost" type="button" disabled class="w-full rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-[#6B7280] sm:w-auto">Upload - Insufficient Credits</button>
+                            <a x-show="result?.roblox_creator_url" :href="result?.roblox_creator_url" target="_blank" rel="noopener" class="wx-btn-secondary w-full px-4 py-2.5 text-sm sm:w-auto">Open Creator Hub</a>
+                            <button x-show="result?.id" type="button" @click="refreshResultStatus" class="wx-btn-secondary w-full px-4 py-2.5 text-sm sm:w-auto">Refresh Status</button>
+                            <button x-show="result?.roblox_asset_id" type="button" @click="navigator.clipboard.writeText(result.roblox_asset_id)" class="wx-btn-secondary w-full px-4 py-2.5 text-sm sm:w-auto">Copy Asset ID</button>
                         @else
-                            <a href="{{ route('roblox.connect') }}" class="wx-btn-primary px-4 py-2.5 text-sm">Connect Roblox</a>
+                            <a href="{{ route('roblox.connect') }}" class="wx-btn-primary w-full px-4 py-2.5 text-sm sm:w-auto">Connect Roblox</a>
                         @endif
                     </div>
                 </div>

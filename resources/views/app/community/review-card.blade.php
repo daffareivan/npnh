@@ -6,8 +6,8 @@
 <article class="group rounded-[28px] border border-white/[0.08] bg-[#111214] p-6 shadow-[0_18px_70px_rgba(0,0,0,.24)] transition duration-300 hover:border-white/20">
     <div class="flex gap-4">
         <div class="relative">
-            <div class="grid size-12 place-items-center rounded-full border border-white/10 bg-white/[0.07] text-sm font-semibold text-white">{{ strtoupper(substr($review->user->name, 0, 1)) }}</div>
-            <div class="pointer-events-none absolute left-0 top-14 z-20 hidden w-72 rounded-2xl border border-white/10 bg-[#111214] p-4 shadow-2xl group-hover:block">
+            <div tabindex="0" class="grid size-12 place-items-center rounded-full border border-white/10 bg-white/[0.07] text-sm font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-white/40">{{ strtoupper(substr($review->user->name, 0, 1)) }}</div>
+            <div class="pointer-events-none absolute left-0 top-14 z-20 hidden w-72 max-w-[calc(100vw-3rem)] rounded-2xl border border-white/10 bg-[#111214] p-4 shadow-2xl group-hover:block group-focus-within:block">
                 <div class="flex items-center gap-3">
                     <div class="grid size-11 place-items-center rounded-full bg-white/10 text-white">{{ strtoupper(substr($review->user->name, 0, 1)) }}</div>
                     <div>
@@ -32,7 +32,7 @@
                 @endforeach
             </div>
             <div class="mt-2 flex flex-wrap items-center gap-3 text-sm">
-                <span class="text-white">{{ str_repeat('★', $review->rating) }}<span class="text-white/20">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
+                <x-community.rating-stars :rating="$review->rating" size="16" class="whitespace-nowrap" />
                 <span class="text-[#A3A3A3]">{{ $review->created_at->diffForHumans() }}</span>
             </div>
             <h3 class="mt-4 text-xl font-semibold text-white">{{ $review->title }}</h3>

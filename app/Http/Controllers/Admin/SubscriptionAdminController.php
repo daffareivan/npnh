@@ -49,11 +49,20 @@ class SubscriptionAdminController extends Controller
         return back()->with('status', 'Plan updated.');
     }
 
-    public function orders(): View
+    public function orders(Request $request): View
     {
         return view('pages.admin.subscription.orders', [
             'title' => 'Orders',
-            'orders' => Order::query()->with(['user', 'plan'])->latest()->paginate(20),
+            'orders' => Order::query()
+                ->with(['user', 'plan'])
+                ->when($request->string('search')->toString(), function ($query, $search): void {
+                    $query->where(fn ($q) => $q->where('order_number', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")));
+                })
+                ->when($request->string('status')->toString(), fn ($query, $status) => $query->where('payment_status', $status))
+                ->latest()
+                ->paginate(20)
+                ->withQueryString(),
         ]);
     }
 
@@ -64,11 +73,20 @@ class SubscriptionAdminController extends Controller
         return back()->with('status', 'Order marked as paid and credits added.');
     }
 
-    public function transactions(): View
+    public function transactions(Request $request): View
     {
         return view('pages.admin.subscription.transactions', [
             'title' => 'Credit Transactions',
-            'transactions' => CreditTransaction::query()->with('user')->latest()->paginate(30),
+            'transactions' => CreditTransaction::query()
+                ->with('user')
+                ->when($request->string('search')->toString(), function ($query, $search): void {
+                    $query->where(fn ($q) => $q->where('action', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")));
+                })
+                ->when($request->string('status')->toString(), fn ($query, $status) => $query->where('status', $status))
+                ->latest()
+                ->paginate(30)
+                ->withQueryString(),
         ]);
     }
 

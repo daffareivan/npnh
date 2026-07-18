@@ -10,11 +10,11 @@
         'w-[290px]': $store.sidebar.isExpanded || $store.sidebar.isMobileOpen || $store.sidebar.isHovered,
         'w-[90px]': !$store.sidebar.isExpanded && !$store.sidebar.isHovered,
         'translate-x-0': $store.sidebar.isMobileOpen,
-        '-translate-x-full xl:translate-x-0': !$store.sidebar.isMobileOpen
+        '-translate-x-full md:translate-x-0': !$store.sidebar.isMobileOpen
     }"
     @mouseenter="if (!$store.sidebar.isExpanded) $store.sidebar.setHovered(true)"
     @mouseleave="$store.sidebar.setHovered(false)">
-    <div class="flex pb-7 pt-8" :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ? 'xl:justify-center' : 'justify-start'">
+    <div class="flex pb-7 pt-8" :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ? 'md:justify-center' : 'justify-start'">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
             <span class="wx-pill grid size-10 place-items-center rounded-2xl">
                 {!! \App\Helpers\MenuHelper::getIconSvg('audio-lines') !!}
@@ -28,7 +28,7 @@
             <div class="flex flex-col gap-4">
                 @forelse($navigationMenus as $section)
                     <div>
-                        <h2 class="mb-4 flex text-xs uppercase leading-[20px]" style="color: var(--muted-foreground);" :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ? 'lg:justify-center' : 'justify-start'">
+                        <h2 class="mb-4 flex text-xs uppercase leading-[20px]" style="color: var(--muted-foreground);" :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ? 'md:justify-center' : 'justify-start'">
                             <span x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen" class="tracking-[0.22em]">{{ $navigation->title($section) }}</span>
                             <span x-show="!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen">{!! \App\Helpers\MenuHelper::getIconSvg($section->icon ?: 'pages') !!}</span>
                         </h2>

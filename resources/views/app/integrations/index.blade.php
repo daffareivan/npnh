@@ -8,7 +8,7 @@
             <p class="mt-2 text-[#A3A3A3]">Connect official accounts to simplify your NPNHCREATIVE workflow.</p>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-3">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <a href="{{ route('app.profile') }}" class="wx-card-solid wx-hover-lift p-6">
                 <div class="mb-5 grid size-11 place-items-center rounded-2xl border border-white/10 bg-white/[0.05]">G</div>
                 <h2 class="text-xl font-semibold">Google</h2>

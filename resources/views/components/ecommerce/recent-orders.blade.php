@@ -82,7 +82,7 @@
         </div>
     </div>
 
-    <div class="max-w-full overflow-x-auto custom-scrollbar">
+    <div class="hidden max-w-full overflow-x-auto custom-scrollbar md:block">
         <table class="min-w-full">
             <thead>
                 <tr class="border-t border-gray-100 dark:border-gray-800">
@@ -105,8 +105,8 @@
                     <tr class="border-t border-gray-100 dark:border-gray-800">
                         <td class="py-3 whitespace-nowrap">
                             <div class="flex items-center gap-3">
-                                <div class="h-[50px] w-[50px] overflow-hidden rounded-md">
-                                    <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" />
+                                <div class="h-[50px] w-[50px] shrink-0 overflow-hidden rounded-md">
+                                    <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="h-full w-full object-cover" />
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-800 text-theme-sm dark:text-white/90">
@@ -133,5 +133,23 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
+
+    <div class="grid gap-3 md:hidden">
+        @foreach($productsList as $product)
+            <div class="rounded-2xl border border-gray-100 p-3 dark:border-gray-800">
+                <div class="flex items-center gap-3">
+                    <div class="h-[50px] w-[50px] shrink-0 overflow-hidden rounded-md">
+                        <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="h-full w-full object-cover" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate font-medium text-gray-800 text-theme-sm dark:text-white/90">{{ $product['name'] }}</p>
+                        <span class="text-gray-500 text-theme-xs dark:text-gray-400">{{ $product['variants'] }} Variants · {{ $product['category'] }}</span>
+                    </div>
+                    <span class="{{ $getStatusClasses($product['status']) }} shrink-0">{{ $product['status'] }}</span>
+                </div>
+                <p class="mt-2 text-gray-500 text-theme-sm dark:text-gray-400">{{ $product['price'] }}</p>
+            </div>
+        @endforeach
     </div>
 </div>

@@ -21,14 +21,14 @@
                     <div class="flex items-end gap-4">
                         <p class="text-6xl font-semibold text-white">{{ number_format($summary['average'], 1) }}</p>
                         <div class="pb-2">
-                            <p class="text-lg text-white">{{ str_repeat('★', (int) round($summary['average'])) }}<span class="text-white/20">{{ str_repeat('★', max(0, 5 - (int) round($summary['average']))) }}</span></p>
-                            <p class="text-sm text-[#A3A3A3]">{{ number_format($summary['count']) }} Reviews</p>
+                            <x-community.rating-stars :rating="$summary['average']" size="18" class="whitespace-nowrap" />
+                            <p class="mt-1 text-sm text-[#A3A3A3]">{{ number_format($summary['count']) }} Reviews</p>
                         </div>
                     </div>
                     <div class="mt-6 space-y-3">
                         @foreach([5,4,3,2,1] as $rating)
                             <div class="grid grid-cols-[58px_1fr_42px] items-center gap-3 text-xs text-[#A3A3A3]">
-                                <span>{{ str_repeat('★', $rating) }}</span>
+                                <span class="whitespace-nowrap">{{ str_repeat('★', $rating) }}</span>
                                 <div class="h-2 overflow-hidden rounded-full bg-white/10"><div class="h-full rounded-full bg-white" style="width: {{ $summary['distribution'][$rating]['percent'] }}%"></div></div>
                                 <span>{{ $summary['distribution'][$rating]['percent'] }}%</span>
                             </div>
@@ -64,7 +64,7 @@
                     <div class="mt-5 flex flex-wrap gap-2">
                         <a href="{{ route('app.community.reviews') }}" class="rounded-full border border-white/10 px-3 py-2 text-xs text-white">All</a>
                         @foreach([5,4,3,2,1] as $rating)
-                            <a href="{{ route('app.community.reviews', ['rating' => $rating]) }}" class="rounded-full border border-white/10 px-3 py-2 text-xs text-[#A3A3A3] hover:text-white">{{ str_repeat('★', $rating) }}</a>
+                            <a href="{{ route('app.community.reviews', ['rating' => $rating]) }}" class="whitespace-nowrap rounded-full border border-white/10 px-3 py-2 text-xs text-[#A3A3A3] hover:text-white">{{ str_repeat('★', $rating) }}</a>
                         @endforeach
                         @foreach(['verified' => 'Verified', 'premium' => 'Premium', 'enterprise' => 'Enterprise'] as $slug => $label)
                             <a href="{{ route('app.community.reviews', ['badge' => $slug]) }}" class="rounded-full border border-white/10 px-3 py-2 text-xs text-[#A3A3A3] hover:text-white">{{ $label }}</a>

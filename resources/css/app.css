@@ -1102,6 +1102,32 @@ pre[class*='language-'] {
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 18%, transparent), 0 24px 90px color-mix(in srgb, var(--primary) 12%, transparent);
   }
 
+  html:not(.dark) .wx-glow {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 4%, transparent), 0 24px 90px color-mix(in srgb, var(--primary) 3%, transparent);
+  }
+
+  .wx-decor-glow {
+    opacity: 1;
+  }
+
+  html:not(.dark) .wx-decor-glow,
+  html:not(.dark) .wx-aurora,
+  html:not(.dark) .wx-feature-glow,
+  html:not(.dark) .wx-intro-glow {
+    opacity: .2;
+  }
+
+  html:not(.dark) .wx-card,
+  html:not(.dark) .wx-card-solid,
+  html:not(.dark) .wx-panel,
+  html:not(.dark) .wx-menu-popover,
+  html:not(.dark) .wx-feature-card-inner,
+  html:not(.dark) .wx-showcase-card,
+  html:not(.dark) .wx-wave-panel,
+  html:not(.dark) .wx-metric-tile {
+    backdrop-filter: none;
+  }
+
   .wx-btn-primary {
     border-radius: 999px;
     background: var(--primary);
@@ -1120,7 +1146,7 @@ pre[class*='language-'] {
   .wx-btn-secondary {
     border: 1px solid var(--border);
     border-radius: 999px;
-    background: transparent;
+    background: var(--secondary);
     color: var(--foreground);
     transition: background 250ms ease, transform 250ms ease;
   }
@@ -1181,6 +1207,7 @@ pre[class*='language-'] {
   }
 
   .wx-admin-bg [class*="text-[#A3A3A3]"],
+  .wx-admin-bg [class*="text-[#7A7A7A]"],
   .wx-admin-bg [class*="text-[#6B7280]"],
   .wx-admin-bg .text-gray-400,
   .wx-admin-bg .text-gray-500,
@@ -1189,13 +1216,18 @@ pre[class*='language-'] {
     color: var(--muted-foreground) !important;
   }
 
+  .wx-admin-bg [class*="text-[#E5E5E5]"],
+  .wx-admin-bg [class*="text-[#D4D4D4]"] {
+    color: var(--foreground) !important;
+  }
+
   .wx-admin-bg [class*="bg-[#0b0b0d]"],
   .wx-admin-bg [class*="bg-[#101113]"],
-  .wx-admin-bg [class*="bg-black/20"] {
+  .wx-admin-bg [class*="bg-black/"] {
     background: var(--card) !important;
   }
 
-  .wx-admin-bg [class*="bg-white/["] {
+  .wx-admin-bg [class*="bg-white/"] {
     background: color-mix(in srgb, var(--foreground) 4%, transparent) !important;
   }
 
@@ -1215,6 +1247,59 @@ pre[class*='language-'] {
   }
 
   .wx-admin-bg tbody tr {
+    border-color: var(--border);
+  }
+
+  .wx-app {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  .wx-app .text-white,
+  .wx-app [class*="text-white"] {
+    color: var(--foreground) !important;
+  }
+
+  .wx-app [class*="text-[#A3A3A3]"],
+  .wx-app [class*="text-[#7A7A7A]"],
+  .wx-app [class*="text-[#6B7280]"] {
+    color: var(--muted-foreground) !important;
+  }
+
+  .wx-app [class*="text-[#E5E5E5]"],
+  .wx-app [class*="text-[#D4D4D4]"] {
+    color: var(--foreground) !important;
+  }
+
+  .wx-app [class*="bg-[#0b0b0d]"],
+  .wx-app [class*="bg-[#111214]"],
+  .wx-app [class*="bg-[#151618]"],
+  .wx-app [class*="bg-black/"] {
+    background: var(--card) !important;
+  }
+
+  .wx-app [class*="bg-white/"] {
+    background: color-mix(in srgb, var(--foreground) 4%, transparent) !important;
+  }
+
+  .wx-app [class*="border-white"] {
+    border-color: var(--border) !important;
+  }
+
+  .wx-app svg[class*="text-white"],
+  .wx-app .text-white svg {
+    color: var(--foreground) !important;
+  }
+
+  .wx-app table {
+    color: var(--foreground);
+  }
+
+  .wx-app thead {
+    color: var(--muted-foreground);
+  }
+
+  .wx-app tbody tr {
     border-color: var(--border);
   }
 
@@ -1250,6 +1335,10 @@ pre[class*='language-'] {
     border: 1px solid var(--border);
     background: var(--input);
     color: var(--foreground);
+  }
+
+  .wx-field::placeholder {
+    color: var(--muted-foreground);
   }
 
   .wx-field:focus {
@@ -1354,8 +1443,8 @@ pre[class*='language-'] {
     border-color: var(--auth-border) !important;
   }
 
-  .wx-auth [class*="bg-black/20"],
-  .wx-auth [class*="bg-white/["] {
+  .wx-auth [class*="bg-black/"],
+  .wx-auth [class*="bg-white/"] {
     background: var(--auth-panel) !important;
   }
 
@@ -1444,6 +1533,10 @@ pre[class*='language-'] {
     background: color-mix(in srgb, var(--card) 94%, transparent) !important;
   }
 
+  html:not(.dark) .wx-marketing [class*="bg-white/"] {
+    background: color-mix(in srgb, var(--foreground) 4%, transparent) !important;
+  }
+
   html:not(.dark) .wx-marketing [class*="border-white"] {
     border-color: var(--border) !important;
   }
@@ -1462,6 +1555,11 @@ pre[class*='language-'] {
   html:not(.dark) .wx-marketing [class*="text-[#7A7A7A]"],
   html:not(.dark) .wx-marketing [class*="text-[#6B7280]"] {
     color: var(--muted-foreground) !important;
+  }
+
+  html:not(.dark) .wx-marketing [class*="text-[#E5E5E5]"],
+  html:not(.dark) .wx-marketing [class*="text-[#D4D4D4]"] {
+    color: var(--foreground) !important;
   }
 
   html:not(.dark) .wx-marketing .wx-btn-primary {

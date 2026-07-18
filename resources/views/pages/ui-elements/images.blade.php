@@ -27,7 +27,7 @@
             <div class="relative">
                 <div id="pane" class="overflow-hidden">
                     <img src="{{ asset('images/grid-image/image-01.png') }}" alt="Cover"
-                        class="w-full border border-gray-200 rounded-xl dark:border-gray-800" />
+                        class="h-auto w-full border border-gray-200 rounded-xl dark:border-gray-800" />
                 </div>
                 <div id="ghostpane" class="absolute top-0 left-0 duration-300 ease-in-out"></div>
             </div>
@@ -37,12 +37,12 @@
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div>
                     <img src="{{ asset('images/grid-image/image-02.png') }}" alt="grid"
-                        class="w-full border border-gray-200 rounded-xl dark:border-gray-800" />
+                        class="h-auto w-full border border-gray-200 rounded-xl dark:border-gray-800" />
                 </div>
 
                 <div>
                     <img src="{{ asset('images/grid-image/image-03.png') }}" alt="grid"
-                        class="w-full border border-gray-200 rounded-xl dark:border-gray-800" />
+                        class="h-auto w-full border border-gray-200 rounded-xl dark:border-gray-800" />
                 </div>
             </div>
         </x-common.component-card>
@@ -52,7 +52,7 @@
                 @foreach ($images as $image)
                     <div>
                         <img src="{{ $image['src'] }}" alt="{{ $image['alt'] }}"
-                            class="w-full border border-gray-200 rounded-xl dark:border-gray-800" />
+                            class="h-auto w-full border border-gray-200 rounded-xl dark:border-gray-800" />
                     </div>
                 @endforeach
             </div>

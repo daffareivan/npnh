@@ -51,13 +51,14 @@ class SubscriptionController extends Controller
         return redirect($payments->checkoutUrl($order));
     }
 
-    public function showOrder(Request $request, Order $order): View
+    public function showOrder(Request $request, Order $order, PaymentService $payments): View
     {
         abort_unless($order->user_id === $request->user()->id, 403);
 
         return view('app.checkout', [
             'title' => 'Checkout',
             'order' => $order->load('plan'),
+            'paymentUrl' => $payments->checkoutUrl($order),
         ]);
     }
 
