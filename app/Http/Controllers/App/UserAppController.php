@@ -72,10 +72,11 @@ class UserAppController extends Controller
             ->where('user_id', $user->id)
             ->when($search, fn ($query, $search) => $query->where('original_name', 'like', "%{$search}%"))
             ->when($status, fn ($query, $status) => $query->where('status', $status))
+            ->with('files')
             ->latest()
             ->limit(500)
             ->get()
-            ->map(fn (AudioFile $file) => ['type' => 'conversion', 'audio_file' => $file, 'created_at' => $file->created_at]);
+            ->map(fn (AudioFile $file) => ['type' => 'conversion', 'audio_file' => $file, 'conversion_file' => null, 'created_at' => $file->created_at]);
 
         $downloads = DownloadLog::query()
             ->where('user_id', $user->id)
@@ -83,11 +84,11 @@ class UserAppController extends Controller
                 $query->when($search, fn ($q, $search) => $q->where('original_name', 'like', "%{$search}%"))
                     ->when($status, fn ($q, $status) => $q->where('status', $status));
             })
-            ->with('audioFile')
+            ->with(['audioFile', 'conversionFile'])
             ->latest()
             ->limit(500)
             ->get()
-            ->map(fn (DownloadLog $log) => ['type' => 'download', 'audio_file' => $log->audioFile, 'created_at' => $log->created_at]);
+            ->map(fn (DownloadLog $log) => ['type' => 'download', 'audio_file' => $log->audioFile, 'conversion_file' => $log->conversionFile, 'created_at' => $log->created_at]);
 
         $events = $conversions->concat($downloads)->sortByDesc('created_at')->values();
         $page = (int) $request->integer('page', 1);

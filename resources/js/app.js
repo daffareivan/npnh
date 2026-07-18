@@ -64,6 +64,11 @@ window.wxConverter = ({ presets, defaultPresetId, creditBalance = 0, downloadCos
     robloxMessage: '',
     downloadMessage: '',
     downloading: false,
+    downloadingAll: false,
+    uploadingAllRoblox: false,
+    fileActions: {},
+    showUpgradeModal: false,
+    upgradeMessage: '',
     poller: null,
     timeline: ['Uploading', 'Analyzing Audio', 'Applying Preset', 'Encoding OGG', 'Completed'],
     get activePreset() {
@@ -147,73 +152,118 @@ window.wxConverter = ({ presets, defaultPresetId, creditBalance = 0, downloadCos
         if (!this.result) return;
         axios.delete(`/api/converter/history/${this.result.id}`).then(() => this.reset());
     },
-    async downloadResult() {
-        if (!this.result || this.downloading) return;
+    fileState(file) {
+        if (!this.fileActions[file.id]) {
+            this.fileActions[file.id] = { downloading: false, uploading: false, message: '' };
+        }
+        return this.fileActions[file.id];
+    },
+    triggerBlobDownload(blobData, filename) {
+        const blobUrl = window.URL.createObjectURL(new Blob([blobData]));
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(blobUrl);
+    },
+    applyCreditBalance(headerValue) {
+        if (headerValue !== undefined) {
+            this.creditBalance = Number(headerValue);
+        }
+    },
+    openUpgradeModal(message) {
+        this.upgradeMessage = message || '';
+        this.showUpgradeModal = true;
+    },
+    async downloadFile(file) {
+        const state = this.fileState(file);
+        if (state.downloading || !file.download_url) return;
 
         if (this.creditBalance < this.downloadCost) {
-            this.downloadMessage = "Insufficient Credits. You don't have enough credits to download this result.";
+            this.openUpgradeModal("You don't have enough credits to download this file.");
             return;
         }
 
-        this.downloading = true;
-        this.downloadMessage = 'Preparing download';
+        state.downloading = true;
+        state.message = '';
 
         try {
-            let downloadUrl = this.result.download_url;
-
-            if (!downloadUrl && this.result.id) {
-                const status = await axios.get(`/api/converter/status/${this.result.id}`);
-                this.result = status.data.data;
-                downloadUrl = this.result.download_url;
-            }
-
-            if (!downloadUrl) {
-                throw new Error('Download link is not ready yet. Please refresh the result status.');
-            }
-
-            const response = await axios.get(downloadUrl, { responseType: 'blob' });
-            const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = this.result.file_name.replace(/\.[^.]+$/, '.ogg');
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(blobUrl);
-
-            const newBalance = response.headers['x-credit-balance'];
-            if (newBalance !== undefined) {
-                this.creditBalance = Number(newBalance);
-            } else {
-                this.creditBalance = Math.max(0, this.creditBalance - this.downloadCost);
-            }
-
-            this.downloadMessage = 'Download started';
+            const response = await axios.get(file.download_url, { responseType: 'blob' });
+            this.triggerBlobDownload(response.data, file.file_name);
+            this.applyCreditBalance(response.headers['x-credit-balance']);
+            file.downloaded_at = new Date().toISOString();
+            state.message = 'Downloaded';
         } catch (error) {
+            state.message = error.response?.data?.message || 'Download failed';
             if (error.response?.status === 402) {
-                this.downloadMessage = "Insufficient Credits. You don't have enough credits to download this result.";
-            } else {
-                this.downloadMessage = error.response?.data?.message || error.message || 'Download failed';
+                this.openUpgradeModal(state.message);
             }
         } finally {
-            this.downloading = false;
+            state.downloading = false;
         }
     },
-    uploadToRoblox() {
-        if (!this.result || this.robloxUploading) return;
+    async downloadAllFiles() {
+        if (!this.result?.download_all_url || this.downloadingAll) return;
 
-        this.robloxUploading = true;
-        this.robloxMessage = 'Preparing asset';
+        const totalCost = this.downloadCost * (this.result.files?.length || 1);
+        if (this.creditBalance < totalCost) {
+            this.openUpgradeModal("You don't have enough credits to download all files.");
+            return;
+        }
 
-        axios.post('/api/roblox/assets/upload', { audio_file_id: this.result.id }).then((response) => {
-            this.result = response.data.data;
-            this.creditBalance = this.result.credit_balance ?? this.creditBalance;
-            this.robloxMessage = this.result.roblox_asset_id ? 'Upload completed' : (this.result.roblox_error_message || 'Roblox is processing this asset');
-        }).catch((error) => {
-            this.robloxMessage = error.response?.data?.message || 'Upload failed';
-        }).finally(() => {
-            this.robloxUploading = false;
-        });
+        this.downloadingAll = true;
+
+        try {
+            const response = await axios.get(this.result.download_all_url, { responseType: 'blob' });
+            this.triggerBlobDownload(response.data, this.result.file_name.replace(/\.[^.]+$/, '') + '.zip');
+            this.applyCreditBalance(response.headers['x-credit-balance']);
+            (this.result.files || []).forEach((file) => { file.downloaded_at = new Date().toISOString(); });
+        } catch (error) {
+            if (error.response?.status === 402) {
+                this.openUpgradeModal(error.response?.data?.message || "You don't have enough credits to download all files.");
+            }
+        } finally {
+            this.downloadingAll = false;
+        }
+    },
+    async uploadFileToRoblox(file) {
+        const state = this.fileState(file);
+        if (state.uploading) return;
+
+        if (this.creditBalance < this.robloxUploadCost) {
+            this.openUpgradeModal("You don't have enough credits to upload this file to Roblox.");
+            return;
+        }
+
+        state.uploading = true;
+        state.message = 'Uploading...';
+
+        try {
+            const response = await axios.post(`/api/converter/files/${file.id}/upload-roblox`);
+            Object.assign(file, response.data.data);
+            this.creditBalance = Math.max(0, this.creditBalance - this.robloxUploadCost);
+            state.message = file.upload_status === 'uploaded' ? 'Success' : (file.roblox_error_message || 'Processing');
+        } catch (error) {
+            state.message = error.response?.data?.message || 'Failed';
+            if (error.response?.status === 402) {
+                this.openUpgradeModal(state.message);
+            }
+        } finally {
+            state.uploading = false;
+        }
+    },
+    async uploadAllToRoblox() {
+        if (!this.result?.files?.length || this.uploadingAllRoblox) return;
+
+        this.uploadingAllRoblox = true;
+
+        for (const file of this.result.files) {
+            await this.uploadFileToRoblox(file);
+        }
+
+        this.uploadingAllRoblox = false;
     },
     refreshResultStatus() {
         if (!this.result?.id) return;
@@ -234,6 +284,13 @@ window.wxConverter = ({ presets, defaultPresetId, creditBalance = 0, downloadCos
         this.statusLabel = 'Waiting';
         this.audioFile = null;
         this.result = null;
+        this.fileActions = {};
+    },
+    formatDuration(seconds) {
+        const total = Math.round(Number(seconds) || 0);
+        const minutes = Math.floor(total / 60);
+        const secs = total % 60;
+        return `${minutes}:${String(secs).padStart(2, '0')}`;
     },
     resultItems() {
         if (!this.result) return [];

@@ -67,4 +67,14 @@ class AudioFile extends Model
     {
         return $this->hasMany(DownloadLog::class);
     }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(ConversionFile::class)->orderBy('sequence');
+    }
+
+    public function isSplit(): bool
+    {
+        return $this->files()->count() > 1;
+    }
 }

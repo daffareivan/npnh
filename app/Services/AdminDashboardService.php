@@ -25,6 +25,8 @@ class AdminDashboardService
 
             $roblox = $this->dashboard->robloxUploadStats();
             $credits = $this->dashboard->creditStats();
+            $mostDownloaded = $this->dashboard->mostDownloadedFile();
+            $mostUploaded = $this->dashboard->mostUploadedFile();
 
             return [
                 'kpis' => [
@@ -33,6 +35,11 @@ class AdminDashboardService
                     ['label' => 'Total Audio Converted', 'value' => $this->dashboard->totalConversions(), 'meta' => $this->dashboard->conversionsBetween(today(), now()).' today / '.$this->dashboard->conversionsBetween(now()->startOfWeek(), now()).' this week', 'tone' => 'neutral', 'icon' => 'audio'],
                     ['label' => 'Total Downloads', 'value' => $this->dashboard->totalDownloads(), 'meta' => 'credit-gated result usage', 'tone' => 'neutral', 'icon' => 'download'],
                     ['label' => 'Roblox Uploads', 'value' => $roblox['success'], 'meta' => $roblox['failed'].' failed / '.$roblox['rate'].'% success', 'tone' => $roblox['failed'] > 0 ? 'warning' : 'positive', 'icon' => 'cloud'],
+                    ['label' => 'Total Converted Files', 'value' => $this->dashboard->totalConvertedFiles(), 'meta' => 'incl. auto-split segments', 'tone' => 'neutral', 'icon' => 'audio'],
+                    ['label' => 'Total Split Files', 'value' => $this->dashboard->totalSplitFiles(), 'meta' => 'files from conversions > 6 min', 'tone' => 'neutral', 'icon' => 'audio'],
+                    ['label' => 'Average File Duration', 'value' => gmdate('i:s', (int) $this->dashboard->averageFileDuration()), 'meta' => 'mm:ss per output file', 'tone' => 'neutral', 'icon' => 'activity'],
+                    ['label' => 'Most Uploaded File', 'value' => $mostUploaded['name'] ?? '—', 'meta' => $mostUploaded ? $mostUploaded['count'].' Roblox uploads' : 'no uploads yet', 'tone' => 'neutral', 'icon' => 'cloud'],
+                    ['label' => 'Most Downloaded File', 'value' => $mostDownloaded['name'] ?? '—', 'meta' => $mostDownloaded ? $mostDownloaded['count'].' downloads' : 'no downloads yet', 'tone' => 'neutral', 'icon' => 'download'],
                 ],
                 'financial' => [
                     'revenue' => [

@@ -19,7 +19,7 @@ class AudioFileRepository
     public function paginate(int $userId, int $perPage = 10): LengthAwarePaginator
     {
         return AudioFile::query()
-            ->with('preset')
+            ->with(['preset', 'files'])
             ->where('user_id', $userId)
             ->latest()
             ->paginate($perPage);

@@ -6,6 +6,7 @@ namespace App\Services\Roblox;
 
 use App\DTO\Roblox\AssetDTO;
 use App\Models\AudioFile;
+use App\Models\ConversionFile;
 use App\Models\RobloxAccount;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -20,14 +21,50 @@ class RobloxAssetService
             throw new RuntimeException('Converted file is not available yet.');
         }
 
+        $audioFile->forceFill(['roblox_status' => 'uploading', 'roblox_error_message' => null])->save();
+
+        $asset = $this->performUpload(
+            Storage::path($audioFile->output_path),
+            pathinfo($audioFile->original_name, PATHINFO_FILENAME),
+            $account,
+        );
+
         $audioFile->forceFill([
-            'roblox_status' => 'uploading',
-            'roblox_error_message' => null,
+            'roblox_status' => $asset->assetId ? 'uploaded' : $asset->status,
+            'roblox_asset_id' => $asset->assetId,
+            'roblox_creator_url' => $asset->creatorUrl,
+            'roblox_error_message' => $asset->message,
         ])->save();
 
-        $path = Storage::path($audioFile->output_path);
-        $displayName = pathinfo($audioFile->original_name, PATHINFO_FILENAME);
+        return $asset;
+    }
 
+    public function uploadConversionFile(ConversionFile $conversionFile, RobloxAccount $account): AssetDTO
+    {
+        if (! $conversionFile->file_path || ! Storage::exists($conversionFile->file_path)) {
+            throw new RuntimeException('Converted file is not available yet.');
+        }
+
+        $conversionFile->forceFill(['roblox_status' => 'uploading', 'roblox_error_message' => null])->save();
+
+        $asset = $this->performUpload(
+            Storage::path($conversionFile->file_path),
+            pathinfo($conversionFile->file_name, PATHINFO_FILENAME),
+            $account,
+        );
+
+        $conversionFile->forceFill([
+            'roblox_status' => $asset->assetId ? 'uploaded' : $asset->status,
+            'roblox_asset_id' => $asset->assetId,
+            'roblox_creator_url' => $asset->creatorUrl,
+            'roblox_error_message' => $asset->message,
+        ])->save();
+
+        return $asset;
+    }
+
+    private function performUpload(string $path, string $displayName, RobloxAccount $account): AssetDTO
+    {
         $request = [
             'assetType' => 'Audio',
             'displayName' => mb_substr($displayName, 0, 50),
@@ -65,16 +102,7 @@ class RobloxAssetService
             throw new RuntimeException('Roblox did not return an upload operation.');
         }
 
-        $asset = $this->waitForOperation($operationPath, $account);
-
-        $audioFile->forceFill([
-            'roblox_status' => $asset->assetId ? 'uploaded' : $asset->status,
-            'roblox_asset_id' => $asset->assetId,
-            'roblox_creator_url' => $asset->creatorUrl,
-            'roblox_error_message' => $asset->message,
-        ])->save();
-
-        return $asset;
+        return $this->waitForOperation($operationPath, $account);
     }
 
     public function prepareManualUpload(AudioFile $audioFile): AssetDTO

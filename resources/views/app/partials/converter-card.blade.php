@@ -70,43 +70,99 @@
                 </div>
             </template>
         </div>
+        <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            <div class="rounded-[18px] border border-white/[0.05] bg-black/20 p-4">
+                <p class="text-sm text-[#A3A3A3]">{{ __('converter.file_count') }}</p>
+                <p class="mt-1 font-medium" x-text="result?.split_count || 1"></p>
+            </div>
+            <div class="rounded-[18px] border border-white/[0.05] bg-black/20 p-4">
+                <p class="text-sm text-[#A3A3A3]">{{ __('converter.total_duration') }}</p>
+                <p class="mt-1 font-medium" x-text="formatDuration(result?.total_duration)"></p>
+            </div>
+        </div>
+
         <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
-            <button x-show="creditBalance >= downloadCost" type="button" @click="downloadResult" :disabled="downloading" class="wx-btn-primary w-full px-4 py-2.5 text-sm sm:w-auto" x-text="downloading ? 'Downloading...' : `Download (-${downloadCost} Credit)`"></button>
-            <button x-show="creditBalance < downloadCost" type="button" disabled class="w-full rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-[#6B7280] sm:w-auto">Download - Insufficient Credits</button>
+            <button x-show="(result?.split_count || 1) > 1" type="button" @click="downloadAllFiles" :disabled="downloadingAll" class="wx-btn-primary w-full px-4 py-2.5 text-sm sm:w-auto" x-text="downloadingAll ? 'Preparing...' : `{{ __('converter.download_all') }}`"></button>
+            @auth
+                @if(auth()->user()->robloxAccount)
+                    <button x-show="(result?.split_count || 1) > 1" type="button" @click="uploadAllToRoblox" :disabled="uploadingAllRoblox" class="wx-btn-secondary w-full px-4 py-2.5 text-sm sm:w-auto" x-text="uploadingAllRoblox ? '{{ __('converter.uploading') }}' : `{{ __('converter.upload_all_roblox') }}`"></button>
+                @endif
+            @endauth
             <button type="button" @click="reset" class="wx-btn-secondary w-full px-4 py-2.5 text-sm sm:w-auto">Convert Again</button>
         </div>
-        <p x-show="downloadMessage" class="mt-3 text-sm text-[#A3A3A3]" x-text="downloadMessage"></p>
+
         @auth
-            <div class="mt-5 rounded-[20px] border border-white/[0.06] bg-black/20 p-4">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="font-semibold">Upload to Roblox</p>
-                        @if(auth()->user()->robloxAccount)
-                            <p class="mt-1 text-sm text-[#A3A3A3]">Upload the converted audio to Roblox using the official Open Cloud Assets API.</p>
-                            <p class="mt-1 text-sm text-[#A3A3A3]">Cost: <span x-text="robloxUploadCost"></span> Credits</p>
-                            <p x-show="robloxMessage" class="mt-2 text-sm text-white" x-text="robloxMessage"></p>
-                            <p x-show="result?.roblox_status === 'uploaded'" class="mt-2 text-sm text-white">Uploaded to Roblox Creator Hub.</p>
-                            <p x-show="result?.roblox_status === 'processing'" class="mt-2 text-sm text-[#A3A3A3]">Roblox has accepted the upload and is processing/moderating the asset. It can appear in Creator Hub before the API returns the final Asset ID.</p>
-                            <template x-if="result?.roblox_asset_id">
-                                <p class="mt-2 text-sm text-[#A3A3A3]">Asset ID: <span class="text-white" x-text="result.roblox_asset_id"></span></p>
-                            </template>
-                        @else
-                            <p class="mt-1 text-sm text-[#A3A3A3]">Please connect your Roblox account first.</p>
-                        @endif
-                    </div>
-                    <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                        @if(auth()->user()->robloxAccount)
-                            <button x-show="creditBalance >= robloxUploadCost" type="button" @click="uploadToRoblox" class="wx-btn-primary w-full px-4 py-2.5 text-sm sm:w-auto" :disabled="robloxUploading" x-text="robloxUploading ? 'Uploading...' : `Upload to Roblox (-${robloxUploadCost} Credits)`"></button>
-                            <button x-show="creditBalance < robloxUploadCost" type="button" disabled class="w-full rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-[#6B7280] sm:w-auto">Upload - Insufficient Credits</button>
-                            <a x-show="result?.roblox_creator_url" :href="result?.roblox_creator_url" target="_blank" rel="noopener" class="wx-btn-secondary w-full px-4 py-2.5 text-sm sm:w-auto">Open Creator Hub</a>
-                            <button x-show="result?.id" type="button" @click="refreshResultStatus" class="wx-btn-secondary w-full px-4 py-2.5 text-sm sm:w-auto">Refresh Status</button>
-                            <button x-show="result?.roblox_asset_id" type="button" @click="navigator.clipboard.writeText(result.roblox_asset_id)" class="wx-btn-secondary w-full px-4 py-2.5 text-sm sm:w-auto">Copy Asset ID</button>
-                        @else
-                            <a href="{{ route('roblox.connect') }}" class="wx-btn-primary w-full px-4 py-2.5 text-sm sm:w-auto">Connect Roblox</a>
-                        @endif
-                    </div>
-                </div>
-            </div>
+            @unless(auth()->user()->robloxAccount)
+                <p class="mt-3 text-sm text-[#A3A3A3]">Please connect your Roblox account to upload files. <a href="{{ route('roblox.connect') }}" class="text-white underline">Connect Roblox</a></p>
+            @endunless
         @endauth
+
+        {{-- Desktop: table --}}
+        <div class="mt-5 hidden overflow-hidden rounded-[18px] border border-white/[0.05] lg:block">
+            <table class="min-w-full text-sm">
+                <thead class="border-b border-white/[0.06] bg-black/20">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.12em] text-[#6B7280]">{{ __('converter.file_name') }}</th>
+                        <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.12em] text-[#6B7280]">Duration</th>
+                        <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.12em] text-[#6B7280]">Status</th>
+                        <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.12em] text-[#6B7280]">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/[0.06]">
+                    <template x-for="file in (result?.files || [])" :key="file.id">
+                        <tr>
+                            <td class="px-4 py-3 font-medium" x-text="file.label"></td>
+                            <td class="px-4 py-3 text-[#A3A3A3]" x-text="formatDuration(file.duration)"></td>
+                            <td class="px-4 py-3 text-[#A3A3A3]" x-text="fileState(file).message || (file.upload_status === 'uploaded' ? '{{ __('converter.uploaded') }}' : '')"></td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" @click="downloadFile(file)" :disabled="fileState(file).downloading" class="wx-btn-secondary px-3 py-1.5 text-xs" x-text="fileState(file).downloading ? '...' : '{{ __('converter.download') }}'"></button>
+                                    @auth
+                                        @if(auth()->user()->robloxAccount)
+                                            <button type="button" @click="uploadFileToRoblox(file)" :disabled="fileState(file).uploading" class="wx-btn-secondary px-3 py-1.5 text-xs" x-text="fileState(file).uploading ? '{{ __('converter.uploading') }}' : '{{ __('converter.upload_roblox') }}'"></button>
+                                        @endif
+                                    @endauth
+                                    <a x-show="file.roblox_creator_url" :href="file.roblox_creator_url" target="_blank" rel="noopener" class="wx-btn-secondary px-3 py-1.5 text-xs">Creator Hub</a>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Mobile: cards --}}
+        <div class="mt-5 grid gap-3 lg:hidden">
+            <template x-for="file in (result?.files || [])" :key="file.id">
+                <div class="rounded-[18px] border border-white/[0.05] bg-black/20 p-4">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="font-medium" x-text="file.label"></p>
+                        <p class="shrink-0 text-sm text-[#A3A3A3]" x-text="formatDuration(file.duration)"></p>
+                    </div>
+                    <p x-show="fileState(file).message || file.upload_status === 'uploaded'" class="mt-2 text-xs text-[#A3A3A3]" x-text="fileState(file).message || '{{ __('converter.uploaded') }}'"></p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <button type="button" @click="downloadFile(file)" :disabled="fileState(file).downloading" class="wx-btn-secondary flex-1 px-3 py-2 text-xs" x-text="fileState(file).downloading ? '...' : '{{ __('converter.download') }}'"></button>
+                        @auth
+                            @if(auth()->user()->robloxAccount)
+                                <button type="button" @click="uploadFileToRoblox(file)" :disabled="fileState(file).uploading" class="wx-btn-secondary flex-1 px-3 py-2 text-xs" x-text="fileState(file).uploading ? '{{ __('converter.uploading') }}' : '{{ __('converter.upload_roblox') }}'"></button>
+                            @endif
+                        @endauth
+                    </div>
+                    <a x-show="file.roblox_creator_url" :href="file.roblox_creator_url" target="_blank" rel="noopener" class="mt-2 inline-block text-xs text-[#A3A3A3] underline">Open Creator Hub</a>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    {{-- Upgrade Plan Modal --}}
+    <div x-show="showUpgradeModal" x-cloak class="fixed inset-0 z-[999999] grid place-items-center bg-black/60 p-4" @click.self="showUpgradeModal = false" @keydown.escape.window="showUpgradeModal = false">
+        <div class="wx-card w-full max-w-sm p-6 text-center" @click.stop>
+            <h3 class="text-lg font-semibold text-white">{{ __('converter.insufficient_credits_title') }}</h3>
+            <p class="mt-2 text-sm text-[#A3A3A3]" x-text="upgradeMessage || `{{ __('converter.insufficient_credits_body') }}`"></p>
+            <div class="mt-5 flex justify-center gap-2">
+                <button type="button" @click="showUpgradeModal = false" class="wx-btn-secondary px-5 py-2.5 text-sm">Close</button>
+                <a href="{{ route('app.pricing') }}" class="wx-btn-primary px-5 py-2.5 text-sm">{{ __('converter.upgrade_plan') }}</a>
+            </div>
+        </div>
     </div>
 </div>

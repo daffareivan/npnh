@@ -26,33 +26,39 @@
             @forelse($events as $event)
                 @php($file = $event['audio_file'])
                 @if($event['type'] === 'conversion')
+                    @php($fileCount = $file->files->count() ?: 1)
+                    @php($totalDuration = $file->files->isNotEmpty() ? $file->files->sum('duration') : $file->duration)
                     <article class="wx-card-solid wx-hover-lift p-5">
                         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                             <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-3">
                                     <h2 class="truncate text-lg font-semibold text-white">{{ $file->original_name }}</h2>
                                     <x-wx.badge :tone="$file->status->value === 'finished' ? 'success' : ($file->status->value === 'failed' ? 'danger' : 'default')">{{ ucfirst($file->status->value) }}</x-wx.badge>
+                                    @if($fileCount > 1)
+                                        <x-wx.badge tone="default">{{ $fileCount }} {{ __('converter.file_count') }}</x-wx.badge>
+                                    @endif
                                 </div>
                                 <div class="mt-3 flex flex-wrap gap-3 text-sm text-[#A3A3A3]">
                                     <span>{{ $file->created_at->format('M d, Y H:i') }}</span>
                                     <span>Preset {{ $file->speed }}x</span>
                                     <span>{{ \Illuminate\Support\Number::fileSize($file->output_size ?: $file->original_size) }}</span>
-                                    <span>{{ $file->duration ? number_format((float) $file->duration, 2).'s' : 'Duration pending' }}</span>
-                                    <span>Roblox: {{ ucfirst($file->roblox_status ?? 'pending') }}</span>
-                                    @if($file->roblox_asset_id)
-                                        <span>Asset ID {{ $file->roblox_asset_id }}</span>
+                                    <span>{{ $totalDuration ? gmdate('i:s', (int) $totalDuration) : 'Duration pending' }}</span>
+                                    @if($fileCount === 1)
+                                        <span>Roblox: {{ ucfirst($file->roblox_status ?? 'pending') }}</span>
+                                        @if($file->roblox_asset_id)
+                                            <span>Asset ID {{ $file->roblox_asset_id }}</span>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
                             <div class="flex flex-wrap gap-2">
-                                @if($file->output_path)
-                                    <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('api.converter.download', now()->addMinutes(15), $file) }}" class="wx-btn-primary px-4 py-2.5 text-sm">Download</a>
+                                @if($fileCount > 1)
+                                    <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('api.converter.download-all', now()->addMinutes(15), $file) }}" class="wx-btn-primary px-4 py-2.5 text-sm">{{ __('converter.download_all') }}</a>
+                                @elseif($file->files->first())
+                                    <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('api.converter.files.download', now()->addMinutes(15), $file->files->first()) }}" class="wx-btn-primary px-4 py-2.5 text-sm">Download</a>
                                 @endif
                                 @if($file->roblox_creator_url)
                                     <a href="{{ $file->roblox_creator_url }}" target="_blank" rel="noopener" class="wx-btn-secondary px-4 py-2.5 text-sm">Open Creator Hub</a>
-                                @endif
-                                @if($file->roblox_asset_id)
-                                    <button type="button" onclick="navigator.clipboard.writeText('{{ $file->roblox_asset_id }}')" class="wx-btn-secondary px-4 py-2.5 text-sm">Copy Asset ID</button>
                                 @endif
                                 <a href="{{ route('app.converter') }}" class="wx-btn-secondary px-4 py-2.5 text-sm">Reconvert</a>
                                 <button onclick="axios.delete('/api/converter/history/{{ $file->id }}').then(() => location.reload())" class="rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-2.5 text-sm text-rose-200 transition hover:bg-rose-400/15">Delete</button>
@@ -60,6 +66,7 @@
                         </div>
                     </article>
                 @elseif($file)
+                    @php($conversionFile = $event['conversion_file'] ?? null)
                     <article class="wx-card p-4">
                         <div class="flex flex-wrap items-center justify-between gap-3">
                             <div class="flex min-w-0 items-center gap-3">
@@ -67,11 +74,16 @@
                                     <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
                                 </span>
                                 <div class="min-w-0">
-                                    <p class="truncate text-sm font-medium text-white">Downloaded {{ $file->original_name }}</p>
+                                    <p class="truncate text-sm font-medium text-white">
+                                        {{ __('converter.downloaded') }}
+                                        {{ $conversionFile ? $conversionFile->label().' — '.$file->original_name : $file->original_name }}
+                                    </p>
                                     <p class="text-xs text-[#A3A3A3]">{{ $event['created_at']->format('M d, Y H:i') }}</p>
                                 </div>
                             </div>
-                            @if($file->output_path)
+                            @if($conversionFile)
+                                <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('api.converter.files.download', now()->addMinutes(15), $conversionFile) }}" class="wx-btn-secondary shrink-0 px-4 py-2 text-xs">Download Again</a>
+                            @elseif($file->output_path)
                                 <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('api.converter.download', now()->addMinutes(15), $file) }}" class="wx-btn-secondary shrink-0 px-4 py-2 text-xs">Download Again</a>
                             @endif
                         </div>

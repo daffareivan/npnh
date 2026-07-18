@@ -55,6 +55,8 @@ class ProcessAudioConversion implements ShouldQueue
         ])->save();
 
         $jobRecord?->forceFill(['status' => ConversionStatus::Finished, 'finished_at' => now()])->save();
+
+        SplitAudioConversionJob::dispatch($audioFile->id)->onQueue(config('converter.queue'));
     }
 
     public function failed(Throwable $exception): void

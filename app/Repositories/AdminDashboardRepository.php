@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Enums\ConversionStatus;
 use App\Models\ActivityLog;
 use App\Models\AudioFile;
+use App\Models\ConversionFile;
 use App\Models\CreditTransaction;
 use App\Models\DownloadLog;
 use App\Models\Order;
@@ -64,6 +65,55 @@ class AdminDashboardRepository
             'failed' => $failed,
             'rate' => $total > 0 ? round(($success / $total) * 100, 1) : 0,
         ];
+    }
+
+    public function totalConvertedFiles(): int
+    {
+        return ConversionFile::query()->count();
+    }
+
+    public function totalSplitFiles(): int
+    {
+        return ConversionFile::query()
+            ->whereIn('audio_file_id', function ($query): void {
+                $query->select('audio_file_id')
+                    ->from('conversion_files')
+                    ->groupBy('audio_file_id')
+                    ->havingRaw('COUNT(*) > 1');
+            })
+            ->count();
+    }
+
+    public function averageFileDuration(): float
+    {
+        return round((float) ConversionFile::query()->whereNotNull('duration')->avg('duration'), 1);
+    }
+
+    public function mostDownloadedFile(): ?array
+    {
+        $row = DownloadLog::query()
+            ->join('audio_files', 'audio_files.id', '=', 'download_logs.audio_file_id')
+            ->select('audio_files.original_name')
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('audio_files.original_name')
+            ->orderByDesc('total')
+            ->first();
+
+        return $row ? ['name' => $row->original_name, 'count' => (int) $row->total] : null;
+    }
+
+    public function mostUploadedFile(): ?array
+    {
+        $row = ConversionFile::query()
+            ->join('audio_files', 'audio_files.id', '=', 'conversion_files.audio_file_id')
+            ->whereNotNull('conversion_files.uploaded_at')
+            ->select('audio_files.original_name')
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('audio_files.original_name')
+            ->orderByDesc('total')
+            ->first();
+
+        return $row ? ['name' => $row->original_name, 'count' => (int) $row->total] : null;
     }
 
     public function revenueBetween(CarbonInterface $start, CarbonInterface $end): int
