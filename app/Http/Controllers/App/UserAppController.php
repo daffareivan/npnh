@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Enums\ConversionStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AudioFile;
 use App\Models\ConversionPreset;
@@ -72,6 +73,13 @@ class UserAppController extends Controller
             ->where('user_id', $user->id)
             ->when($search, fn ($query, $search) => $query->where('original_name', 'like', "%{$search}%"))
             ->when($status, fn ($query, $status) => $query->where('status', $status))
+            // A finished conversion only earns its place in history once the user has
+            // actually done something with it (downloaded or uploaded to Roblox) —
+            // otherwise it clutters the list the moment the background job finishes.
+            ->where(function ($query): void {
+                $query->where('status', '!=', ConversionStatus::Finished->value)
+                    ->orWhereHas('files', fn ($q) => $q->whereNotNull('downloaded_at')->orWhereNotNull('uploaded_at'));
+            })
             ->with('files')
             ->latest()
             ->limit(500)
