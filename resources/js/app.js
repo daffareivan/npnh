@@ -33,14 +33,14 @@ window.brandIntro = () => ({
         window.setTimeout(() => {
             this.exiting = true;
             document.documentElement.classList.add('wx-page-ready');
-        }, 2000);
+        }, 2800);
 
         window.setTimeout(() => {
             this.visible = false;
             this.exiting = false;
             sessionStorage.setItem('npnhcreative_intro_shown', '1');
             document.documentElement.classList.remove('wx-intro-running');
-        }, 2500);
+        }, 3300);
     },
 });
 
@@ -111,9 +111,12 @@ window.wxConverter = ({ presets, defaultPresetId, creditBalance = 0, downloadCos
             return axios.post('/api/converter/process', { audio_file_id: this.audioFile.id });
         }).then((response) => {
             this.audioFile = response.data.data;
+            this.progress = this.audioFile.progress;
+            this.statusLabel = this.label(this.audioFile.status);
             this.pollStatus();
         }).catch((error) => {
             if (error.name !== 'CanceledError') {
+                this.progress = 0;
                 this.statusLabel = error.response?.data?.message || 'Upload failed';
             }
         }).finally(() => {

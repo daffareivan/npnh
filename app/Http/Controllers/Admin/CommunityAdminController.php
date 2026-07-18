@@ -19,7 +19,7 @@ class CommunityAdminController extends Controller
     public function reviews(Request $request): View
     {
         return view('pages.admin.community.reviews', [
-            'title' => 'Community Reviews',
+            'title' => __('pages.admin_reviews'),
             'reviews' => Review::query()
                 ->with('user.badges')
                 ->when($request->string('search')->toString(), function ($query, $search): void {
@@ -54,7 +54,7 @@ class CommunityAdminController extends Controller
     public function comments(Request $request): View
     {
         return view('pages.admin.community.comments', [
-            'title' => 'Community Comments',
+            'title' => __('pages.admin_comments'),
             'comments' => ReviewComment::query()
                 ->with(['user.badges', 'review'])
                 ->when($request->string('search')->toString(), function ($query, $search): void {
@@ -86,14 +86,14 @@ class CommunityAdminController extends Controller
     public function reports(): View
     {
         return view('pages.admin.community.reports', [
-            'title' => 'Community Reports',
+            'title' => __('pages.admin_reports'),
         ]);
     }
 
     public function badges(): View
     {
         return view('pages.admin.community.badges', [
-            'title' => 'Badges',
+            'title' => __('pages.badges'),
             'badges' => Badge::query()->orderByDesc('priority')->get(),
             'users' => User::query()->orderBy('name')->limit(200)->get(),
         ]);

@@ -17,7 +17,7 @@ class RegisteredUserController extends Controller
 {
     public function create(): View
     {
-        return view('pages.auth.signup', ['title' => 'Sign Up']);
+        return view('pages.auth.signup', ['title' => __('pages.register')]);
     }
 
     public function store(RegisterRequest $request, CreditService $credits): RedirectResponse

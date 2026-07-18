@@ -20,7 +20,7 @@ class SubscriptionController extends Controller
     public function pricing(Request $request, SubscriptionService $subscriptions): View
     {
         return view('app.pricing', [
-            'title' => 'Pricing',
+            'title' => __('pages.pricing'),
             'plans' => Plan::query()->active()->ordered()->get(),
             'currentPlan' => $subscriptions->currentPlan($request->user()),
             'creditBalance' => $request->user()->credits_balance,
@@ -56,7 +56,7 @@ class SubscriptionController extends Controller
         abort_unless($order->user_id === $request->user()->id, 403);
 
         return view('app.checkout', [
-            'title' => 'Checkout',
+            'title' => __('pages.checkout'),
             'order' => $order->load('plan'),
             'paymentUrl' => $payments->checkoutUrl($order),
         ]);

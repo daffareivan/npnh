@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? __('auth.title') }} | NPNHCREATIVE</title>
+    <title>{{ $title ?? __('auth.title') }} | {{ config('app.name') }}</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <script>

@@ -71,6 +71,20 @@ class CreditService
         return $this->change($user, abs($amount), $action, $status, $subject, $metadata);
     }
 
+    public function setBalance(User $user, int $newBalance, string $action = 'Admin Balance Adjustment', array $metadata = []): ?CreditTransaction
+    {
+        return DB::transaction(function () use ($user, $newBalance, $action, $metadata): ?CreditTransaction {
+            $locked = User::query()->lockForUpdate()->findOrFail($user->id);
+            $delta = $newBalance - $locked->credits_balance;
+
+            if ($delta === 0) {
+                return null;
+            }
+
+            return $this->change($locked, $delta, $action, 'success', null, $metadata);
+        });
+    }
+
     private function change(User $user, int $amount, string $action, string $status, ?Model $subject = null, array $metadata = []): CreditTransaction
     {
         return DB::transaction(function () use ($user, $amount, $action, $status, $subject, $metadata): CreditTransaction {

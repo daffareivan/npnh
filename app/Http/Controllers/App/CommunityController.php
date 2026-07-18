@@ -43,7 +43,7 @@ class CommunityController extends Controller
             ->withQueryString();
 
         return view('app.community.reviews', [
-            'title' => 'Community Reviews',
+            'title' => __('pages.community_reviews'),
             'reviews' => $reviews,
             'summary' => $community->summary(),
             'myReview' => Review::query()->where('user_id', $request->user()->id)->first(),
@@ -121,7 +121,7 @@ class CommunityController extends Controller
     public function myReviews(Request $request): View
     {
         return view('app.community.my-reviews', [
-            'title' => 'My Reviews',
+            'title' => __('pages.my_reviews'),
             'review' => Review::query()->where('user_id', $request->user()->id)->with('comments')->first(),
         ]);
     }
@@ -129,7 +129,7 @@ class CommunityController extends Controller
     public function leaderboard(CommunityService $community): View
     {
         return view('app.community.leaderboard', [
-            'title' => 'Leaderboard',
+            'title' => __('pages.leaderboard'),
             'leaderboard' => $community->leaderboard(),
         ]);
     }

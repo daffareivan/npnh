@@ -22,12 +22,16 @@ class SubscriptionService
 
         $free = Plan::query()->where('slug', 'free')->firstOrFail();
 
-        return Subscription::query()->create([
+        $subscription = Subscription::query()->create([
             'user_id' => $user->id,
             'plan_id' => $free->id,
             'status' => 'active',
             'started_at' => now(),
         ]);
+
+        $this->grantUploadAllowance($user, $free);
+
+        return $subscription;
     }
 
     public function currentPlan(User $user): Plan
@@ -59,9 +63,35 @@ class SubscriptionService
                 ]);
             }
 
+            $this->grantUploadAllowance($user, $plan);
+
             app(CommunityService::class)->syncMembershipBadge($user->fresh(['activeSubscription.plan']));
 
             return $subscription;
+        });
+    }
+
+    /**
+     * Cumulative upload allowance: every plan activation adds that plan's
+     * max_uploads on top of whatever the user already has. It never resets,
+     * and once a user reaches an unlimited plan (max_uploads = null) they stay unlimited.
+     */
+    private function grantUploadAllowance(User $user, Plan $plan): void
+    {
+        DB::transaction(function () use ($user, $plan): void {
+            $locked = User::query()->lockForUpdate()->findOrFail($user->id);
+
+            if ($locked->upload_unlimited) {
+                return;
+            }
+
+            if ($plan->max_uploads === null) {
+                $locked->forceFill(['upload_unlimited' => true])->save();
+
+                return;
+            }
+
+            $locked->forceFill(['upload_limit' => $locked->upload_limit + $plan->max_uploads])->save();
         });
     }
 }

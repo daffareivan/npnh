@@ -13,10 +13,13 @@
         planOpen: false,
         planUser: { id: null, name: '', planId: null, customPlanName: '' },
         customPlanIds: [{{ $plans->where('is_custom', true)->pluck('id')->implode(',') }}],
+        creditsOpen: false,
+        creditsUser: { id: null, name: '', balance: 0 },
         openEdit(user) { this.editUser = { ...user, password: '' }; this.editOpen = true },
         openDelete(user) { this.deleteUser = user; this.deleteOpen = true },
         openPlan(user) { this.planUser = { customPlanName: '', ...user }; this.planOpen = true },
-    }" @keydown.escape.window="createOpen = false; editOpen = false; deleteOpen = false; planOpen = false">
+        openCredits(user) { this.creditsUser = { note: '', ...user }; this.creditsOpen = true },
+    }" @keydown.escape.window="createOpen = false; editOpen = false; deleteOpen = false; planOpen = false; creditsOpen = false">
 
         <div class="mb-5 flex items-center justify-end">
             <button type="button" @click="createOpen = true" class="wx-btn-primary px-5 py-2.5 text-sm font-semibold">+ Add User</button>
@@ -62,6 +65,7 @@
                                 <div class="flex flex-wrap gap-3">
                                     <button type="button" @click="openEdit({ id: {{ $user->id }}, name: @js($user->name), email: @js($user->email), role: @js($user->hasRole('admin') ? 'admin' : 'user'), status: @js($user->status) })" class="text-xs font-semibold text-brand-500">Edit</button>
                                     <button type="button" @click="openPlan({ id: {{ $user->id }}, name: @js($user->name), planId: {{ $user->activeSubscription?->plan_id ?? 'null' }}, customPlanName: @js($user->activeSubscription?->custom_plan_name ?? '') })" class="text-xs font-semibold text-blue-400">Change Plan</button>
+                                    <button type="button" @click="openCredits({ id: {{ $user->id }}, name: @js($user->name), balance: {{ $user->credits_balance }} })" class="text-xs font-semibold text-amber-400">Set Credits</button>
                                     <button type="button" @click="openDelete({ id: {{ $user->id }}, name: @js($user->name) })" class="text-xs font-semibold text-error-500">Delete</button>
                                 </div>
                                 <form method="POST" action="{{ route('admin.users.credits.add', $user) }}" class="mt-2 flex items-center gap-1.5">
@@ -99,6 +103,7 @@
                     <div class="mt-4 flex flex-wrap gap-3 border-t border-white/[0.06] pt-3">
                         <button type="button" @click="openEdit({ id: {{ $user->id }}, name: @js($user->name), email: @js($user->email), role: @js($user->hasRole('admin') ? 'admin' : 'user'), status: @js($user->status) })" class="text-sm font-semibold text-brand-500">Edit</button>
                         <button type="button" @click="openPlan({ id: {{ $user->id }}, name: @js($user->name), planId: {{ $user->activeSubscription?->plan_id ?? 'null' }}, customPlanName: @js($user->activeSubscription?->custom_plan_name ?? '') })" class="text-sm font-semibold text-blue-400">Change Plan</button>
+                        <button type="button" @click="openCredits({ id: {{ $user->id }}, name: @js($user->name), balance: {{ $user->credits_balance }} })" class="text-sm font-semibold text-amber-400">Set Credits</button>
                         <button type="button" @click="openDelete({ id: {{ $user->id }}, name: @js($user->name) })" class="text-sm font-semibold text-error-500">Delete</button>
                     </div>
                     <form method="POST" action="{{ route('admin.users.credits.add', $user) }}" class="mt-3 flex flex-wrap items-center gap-1.5 border-t border-white/[0.06] pt-3">
@@ -228,6 +233,31 @@
                     <div class="mt-4 flex justify-end gap-2">
                         <button type="button" @click="planOpen = false" class="wx-btn-secondary px-5 py-2.5 text-sm">Cancel</button>
                         <button type="submit" class="wx-btn-primary px-5 py-2.5 text-sm font-semibold">Change Plan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- Set Credits Modal --}}
+        <div x-show="creditsOpen" x-cloak class="fixed inset-0 z-99999 flex items-end justify-center overflow-y-auto sm:items-center sm:p-5" style="display: none;">
+            <div @click="creditsOpen = false" class="fixed inset-0 h-full w-full bg-black/60 backdrop-blur-sm" x-transition.opacity></div>
+            <div @click.stop class="wx-card relative w-full max-w-sm p-6" x-transition>
+                <h3 class="text-lg font-semibold text-white">Set Credit Balance</h3>
+                <p class="mt-1 text-xs text-[#6B7280]" x-text="creditsUser.name"></p>
+                <p class="mt-2 text-sm text-[#A3A3A3]">Overwrites the user's credit balance directly to this exact amount (recorded as an adjustment in their credit history).</p>
+                <form method="POST" :action="'{{ url('/admin/users') }}/' + creditsUser.id + '/credits/set'" class="mt-5 flex flex-col gap-3">
+                    @csrf
+                    <div>
+                        <label class="mb-1 block text-xs font-medium text-[#A3A3A3]">New Balance</label>
+                        <input type="number" name="credits_balance" x-model="creditsUser.balance" min="0" max="100000000" required class="h-11 w-full rounded-2xl border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none focus:border-white/30">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-medium text-[#A3A3A3]">Note <span class="normal-case text-[#6B7280]">(optional)</span></label>
+                        <input type="text" name="note" x-model="creditsUser.note" maxlength="255" placeholder="Reason for adjustment" class="h-11 w-full rounded-2xl border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none focus:border-white/30">
+                    </div>
+                    <div class="mt-4 flex justify-end gap-2">
+                        <button type="button" @click="creditsOpen = false" class="wx-btn-secondary px-5 py-2.5 text-sm">Cancel</button>
+                        <button type="submit" class="wx-btn-primary px-5 py-2.5 text-sm font-semibold">Save</button>
                     </div>
                 </form>
             </div>

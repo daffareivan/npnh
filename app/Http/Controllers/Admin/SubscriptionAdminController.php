@@ -19,7 +19,7 @@ class SubscriptionAdminController extends Controller
     public function plans(): View
     {
         return view('pages.admin.subscription.plans', [
-            'title' => 'Subscription Plans',
+            'title' => __('pages.subscription_plans'),
             'plans' => Plan::query()->ordered()->get(),
         ]);
     }
@@ -30,6 +30,7 @@ class SubscriptionAdminController extends Controller
             'name' => ['required', 'string', 'max:50'],
             'price' => ['nullable', 'integer', 'min:0'],
             'credits' => ['nullable', 'integer', 'min:0'],
+            'max_uploads' => ['nullable', 'integer', 'min:0'],
             'status' => ['required', 'in:active,inactive'],
             'sort_order' => ['required', 'integer', 'min:0'],
             'features' => ['nullable', 'string'],
@@ -39,6 +40,7 @@ class SubscriptionAdminController extends Controller
             ...$data,
             'price' => $plan->is_custom ? null : $data['price'],
             'credits' => $plan->is_custom ? null : $data['credits'],
+            'max_uploads' => $data['max_uploads'],
             'features' => collect(preg_split('/\r\n|\r|\n/', $data['features'] ?? ''))
                 ->map(fn ($feature) => trim($feature))
                 ->filter()
@@ -52,7 +54,7 @@ class SubscriptionAdminController extends Controller
     public function orders(Request $request): View
     {
         return view('pages.admin.subscription.orders', [
-            'title' => 'Orders',
+            'title' => __('pages.orders'),
             'orders' => Order::query()
                 ->with(['user', 'plan'])
                 ->when($request->string('search')->toString(), function ($query, $search): void {
@@ -76,7 +78,7 @@ class SubscriptionAdminController extends Controller
     public function transactions(Request $request): View
     {
         return view('pages.admin.subscription.transactions', [
-            'title' => 'Credit Transactions',
+            'title' => __('pages.credit_transactions'),
             'transactions' => CreditTransaction::query()
                 ->with('user')
                 ->when($request->string('search')->toString(), function ($query, $search): void {
@@ -93,7 +95,7 @@ class SubscriptionAdminController extends Controller
     public function contactSettings(): View
     {
         return view('pages.admin.subscription.contact-settings', [
-            'title' => 'Contact Settings',
+            'title' => __('pages.contact_settings'),
             'settings' => ContactSetting::query()->pluck('value', 'key')->all(),
         ]);
     }

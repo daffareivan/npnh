@@ -12,7 +12,7 @@ class InvoiceController extends Controller
     public function paymentHistory(Request $request): View
     {
         return view('app.payments.history', [
-            'title' => __('payment.history_title'),
+            'title' => __('pages.payment_history'),
             'transactions' => PaymentTransaction::query()
                 ->where('user_id', $request->user()->id)
                 ->when($request->string('search')->toString(), fn ($query, $search) => $query->where('order_id', 'like', "%{$search}%"))
@@ -26,7 +26,7 @@ class InvoiceController extends Controller
     public function invoices(Request $request): View
     {
         return view('app.payments.invoices', [
-            'title' => __('payment.invoices_title'),
+            'title' => __('pages.invoices'),
             'invoices' => Invoice::query()
                 ->where('user_id', $request->user()->id)
                 ->when($request->string('search')->toString(), fn ($query, $search) => $query->where('invoice_number', 'like', "%{$search}%"))

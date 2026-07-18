@@ -20,7 +20,7 @@ class ConverterPageController extends Controller
     public function converter(): View
     {
         return view('pages.converter.dashboard', [
-            'title' => 'NPNHCREATIVE',
+            'title' => __('pages.dashboard'),
             'presets' => ConversionPreset::query()->orderBy('speed')->get(),
             'defaultPreset' => ConversionPreset::query()->where('is_default', true)->first(),
         ]);
@@ -29,7 +29,7 @@ class ConverterPageController extends Controller
     public function history(Request $request): View
     {
         return view('pages.converter.history', [
-            'title' => 'NPNHCREATIVE History',
+            'title' => __('pages.history'),
             'files' => AudioFile::query()
                 ->with('preset')
                 ->when($request->user(), fn ($query, $user) => $query->where('user_id', $user->id))
@@ -41,7 +41,7 @@ class ConverterPageController extends Controller
     public function settings(): View
     {
         return view('pages.converter.settings', [
-            'title' => 'NPNHCREATIVE Settings',
+            'title' => __('pages.settings'),
             'presets' => ConversionPreset::query()->orderBy('speed')->get(),
             'settings' => config('converter'),
         ]);

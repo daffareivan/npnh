@@ -13,7 +13,7 @@ class AdminDashboardController extends Controller
     public function dashboard(AdminDashboardService $dashboard): View
     {
         return view('pages.admin.dashboard', [
-            'title' => 'Admin Dashboard',
+            'title' => __('pages.admin_dashboard'),
             'dashboard' => $dashboard->data(),
         ]);
     }

@@ -77,7 +77,7 @@ class HomeController extends Controller
         $queueFailed = AudioFile::query()->where('status', ConversionStatus::Failed->value)->count();
 
         return view('home', [
-            'title' => 'NPNHCREATIVE',
+            'title' => __('pages.home'),
             'presets' => $presets,
             'plans' => Plan::query()->active()->ordered()->get(),
             'reviewSummary' => $summary,

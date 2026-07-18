@@ -45,7 +45,7 @@
 
         <div>
             <div class="mb-2 flex justify-between text-sm text-[#A3A3A3]"><span x-text="statusLabel"></span><span x-text="progress + '%'"></span></div>
-            <div class="h-2 rounded-full bg-white/10"><div class="h-2 rounded-full bg-white transition-all duration-300" :style="`width: ${progress}%`"></div></div>
+            <div class="h-2 rounded-full" style="background: color-mix(in srgb, var(--foreground) 10%, transparent);"><div class="h-2 rounded-full transition-all duration-300" :style="`width: ${progress}%; background: var(--foreground);`"></div></div>
             <p class="mt-2 text-xs text-[#6B7280]">Estimated time: under 10 seconds for most files</p>
         </div>
 

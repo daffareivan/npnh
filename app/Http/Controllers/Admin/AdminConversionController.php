@@ -16,7 +16,7 @@ class AdminConversionController extends Controller
     public function history(Request $request): View
     {
         return view('pages.admin.history', [
-            'title' => 'Conversion Management',
+            'title' => __('pages.conversion_management'),
             'files' => AudioFile::query()
                 ->with(['user', 'preset'])
                 ->when($request->string('search')->toString(), function ($query, $search): void {
@@ -33,7 +33,7 @@ class AdminConversionController extends Controller
     public function queue(): View
     {
         return view('pages.admin.queue', [
-            'title' => 'Queue Monitor',
+            'title' => __('pages.queue_monitor'),
             'waiting' => DB::table('jobs')->count(),
             'failed' => DB::table('failed_jobs')->count(),
         ]);
@@ -42,7 +42,7 @@ class AdminConversionController extends Controller
     public function analytics(): View
     {
         return view('pages.admin.analytics', [
-            'title' => 'Analytics',
+            'title' => __('pages.analytics'),
             'topUsers' => AudioFile::query()->select('user_id')->selectRaw('COUNT(*) as total')->with('user')->groupBy('user_id')->orderByDesc('total')->limit(10)->get(),
             'topPresets' => AudioFile::query()->select('speed')->selectRaw('COUNT(*) as total')->groupBy('speed')->orderByDesc('total')->get(),
         ]);
@@ -51,7 +51,7 @@ class AdminConversionController extends Controller
     public function activity(Request $request): View
     {
         return view('pages.admin.activity', [
-            'title' => 'Activity Log',
+            'title' => __('pages.activity_log'),
             'logs' => ActivityLog::query()
                 ->with('user')
                 ->when($request->string('event')->toString(), fn ($query, $event) => $query->where('event', 'like', "%{$event}%"))

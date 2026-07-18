@@ -7,11 +7,13 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use App\Models\AudioFile;
 use App\Models\ConversionPreset;
+use App\Models\DownloadLog;
 use App\Services\CreditService;
 use App\Services\CommunityService;
 use App\Services\SubscriptionService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserAppController extends Controller
 {
@@ -23,7 +25,7 @@ class UserAppController extends Controller
         $request->user()->load('badges');
 
         return view('app.dashboard', [
-            'title' => 'NPNHCREATIVE',
+            'title' => __('pages.dashboard'),
             'stats' => [
                 'total' => (clone $query)->count(),
                 'today' => (clone $query)->whereDate('created_at', today())->count(),
@@ -46,7 +48,7 @@ class UserAppController extends Controller
     public function converter(Request $request): View
     {
         return view('app.converter', [
-            'title' => 'Converter',
+            'title' => __('pages.converter'),
             'presets' => ConversionPreset::query()->orderBy('speed')->get(),
             'defaultPreset' => ConversionPreset::query()->where('is_default', true)->first(),
             'robloxAccount' => $request->user()->robloxAccount,
@@ -59,15 +61,49 @@ class UserAppController extends Controller
 
     public function history(Request $request): View
     {
+        $user = $request->user();
+        $search = $request->string('search')->toString();
+        $status = $request->string('status')->toString();
+
+        // Every download is its own timeline entry (like a transaction log), in addition
+        // to the conversion entry itself, so downloading the same file repeatedly still
+        // shows up as separate history rows.
+        $conversions = AudioFile::query()
+            ->where('user_id', $user->id)
+            ->when($search, fn ($query, $search) => $query->where('original_name', 'like', "%{$search}%"))
+            ->when($status, fn ($query, $status) => $query->where('status', $status))
+            ->latest()
+            ->limit(500)
+            ->get()
+            ->map(fn (AudioFile $file) => ['type' => 'conversion', 'audio_file' => $file, 'created_at' => $file->created_at]);
+
+        $downloads = DownloadLog::query()
+            ->where('user_id', $user->id)
+            ->whereHas('audioFile', function ($query) use ($search, $status): void {
+                $query->when($search, fn ($q, $search) => $q->where('original_name', 'like', "%{$search}%"))
+                    ->when($status, fn ($q, $status) => $q->where('status', $status));
+            })
+            ->with('audioFile')
+            ->latest()
+            ->limit(500)
+            ->get()
+            ->map(fn (DownloadLog $log) => ['type' => 'download', 'audio_file' => $log->audioFile, 'created_at' => $log->created_at]);
+
+        $events = $conversions->concat($downloads)->sortByDesc('created_at')->values();
+        $page = (int) $request->integer('page', 1);
+        $perPage = 10;
+
+        $paginated = new LengthAwarePaginator(
+            $events->forPage($page, $perPage)->values(),
+            $events->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         return view('app.history', [
-            'title' => 'History',
-            'files' => AudioFile::query()
-                ->where('user_id', $request->user()->id)
-                ->when($request->string('search')->toString(), fn ($query, $search) => $query->where('original_name', 'like', "%{$search}%"))
-                ->when($request->string('status')->toString(), fn ($query, $status) => $query->where('status', $status))
-                ->latest()
-                ->paginate(10)
-                ->withQueryString(),
+            'title' => __('pages.history'),
+            'events' => $paginated,
         ]);
     }
 
@@ -77,7 +113,7 @@ class UserAppController extends Controller
         $request->user()->load('badges');
 
         return view('app.profile', [
-            'title' => 'Profile',
+            'title' => __('pages.profile'),
             'robloxAccount' => $request->user()->robloxAccount,
             'creditBalance' => $request->user()->credits_balance,
             'badges' => $request->user()->badges,

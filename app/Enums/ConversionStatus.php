@@ -19,9 +19,9 @@ enum ConversionStatus: string
     public function progress(): int
     {
         return match ($this) {
-            self::Pending => 5,
             self::Uploading => 15,
             self::Uploaded => 25,
+            self::Pending => 30,
             self::Analyzing => 40,
             self::Converting => 65,
             self::Encoding => 85,

@@ -12,6 +12,7 @@ use App\Http\Resources\AudioFileResource;
 use App\Models\AudioFile;
 use App\Repositories\AudioFileRepository;
 use App\Services\ConverterService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -23,9 +24,20 @@ class ConverterApiController extends Controller
         private readonly AudioFileRepository $audioFiles,
     ) {}
 
-    public function upload(ConverterUploadRequest $request): AudioFileResource
+    public function upload(ConverterUploadRequest $request, SubscriptionService $subscriptions): AudioFileResource
     {
         $this->authorize('create', AudioFile::class);
+
+        // Ensures upload_limit has been provisioned (e.g. first-ever action for this user)
+        // so a not-yet-initialized null limit can't be misread as "unlimited".
+        $subscriptions->ensureFreeSubscription($request->user());
+        $user = $request->user()->fresh();
+
+        abort_if(
+            $user->hasReachedUploadLimit(),
+            403,
+            "Upload Limit Reached\n\nYou've used all {$user->upload_limit} uploads included in your plan. Upgrade your plan to upload more."
+        );
 
         $audioFile = $this->converter->upload(new ConverterUploadData(
             file: $request->file('file'),

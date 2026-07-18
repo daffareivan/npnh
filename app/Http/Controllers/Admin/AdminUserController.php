@@ -20,7 +20,7 @@ class AdminUserController extends Controller
     public function index(Request $request): View
     {
         return view('pages.admin.users', [
-            'title' => 'Users',
+            'title' => __('pages.users'),
             'users' => User::query()
                 ->with(['roles', 'activeSubscription.plan'])
                 ->withCount('audioFiles')
@@ -75,6 +75,21 @@ class AdminUserController extends Controller
         ]);
 
         return back()->with('status', "Added {$data['amount']} credits to {$user->name}.");
+    }
+
+    public function setCredits(Request $request, User $user, CreditService $credits): RedirectResponse
+    {
+        $data = $request->validate([
+            'credits_balance' => ['required', 'integer', 'min:0', 'max:100000000'],
+            'note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $credits->setBalance($user, (int) $data['credits_balance'], 'admin_balance_adjustment', [
+            'note' => $data['note'] ?? null,
+            'admin_id' => Auth::id(),
+        ]);
+
+        return back()->with('status', "Set {$user->name}'s credit balance to {$data['credits_balance']}.");
     }
 
     public function changePlan(Request $request, User $user, SubscriptionService $subscriptions): RedirectResponse

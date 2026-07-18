@@ -17,7 +17,7 @@ class CreditSettingsController extends Controller
     public function edit(CreditService $credits): View
     {
         return view('pages.admin.credit-settings', [
-            'title' => 'Credit Settings',
+            'title' => __('pages.credit_settings'),
             'settings' => [
                 CreditService::REGISTRATION_BONUS => $credits->get(CreditService::REGISTRATION_BONUS),
                 CreditService::DOWNLOAD_COST => $credits->get(CreditService::DOWNLOAD_COST),

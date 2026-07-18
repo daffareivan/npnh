@@ -15,7 +15,7 @@ class AppSettingsController extends Controller
     public function edit(): View
     {
         return view('pages.admin.app-settings', [
-            'title' => 'App Settings',
+            'title' => __('pages.app_settings'),
             'introAnimationEnabled' => AppSetting::boolean(AppSetting::INTRO_ANIMATION_ENABLED, true),
             'themeDefault' => AppSetting::valueFor(AppSetting::THEME_DEFAULT, 'system'),
             'localeDefault' => AppSetting::valueFor(AppSetting::LOCALE_DEFAULT, 'en'),

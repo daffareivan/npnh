@@ -17,7 +17,7 @@ class PasswordResetController extends Controller
 {
     public function request(): View
     {
-        return view('pages.auth.forgot-password', ['title' => 'Forgot Password']);
+        return view('pages.auth.forgot-password', ['title' => __('pages.forgot_password')]);
     }
 
     public function email(Request $request): RedirectResponse
@@ -33,7 +33,7 @@ class PasswordResetController extends Controller
 
     public function reset(Request $request, string $token): View
     {
-        return view('pages.auth.reset-password', ['title' => 'Reset Password', 'token' => $token, 'email' => $request->email]);
+        return view('pages.auth.reset-password', ['title' => __('pages.reset_password'), 'token' => $token, 'email' => $request->email]);
     }
 
     public function update(Request $request): RedirectResponse

@@ -14,7 +14,7 @@ class EmailVerificationController extends Controller
 {
     public function notice(): View
     {
-        return view('pages.auth.verify-email', ['title' => 'Verify Email']);
+        return view('pages.auth.verify-email', ['title' => __('pages.verify_email')]);
     }
 
     public function verify(EmailVerificationRequest $request): RedirectResponse

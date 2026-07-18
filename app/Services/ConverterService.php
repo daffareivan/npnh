@@ -12,6 +12,7 @@ use App\Models\AudioFile;
 use App\Models\ConversionJob;
 use App\Models\ConversionPreset;
 use App\Models\DownloadLog;
+use App\Models\User;
 use App\Repositories\AudioFileRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -47,6 +48,10 @@ class ConverterService
             'event' => 'upload',
             'properties' => ['file' => $audioFile->original_name],
         ]);
+
+        if ($data->userId) {
+            User::query()->where('id', $data->userId)->increment('uploads_used');
+        }
 
         return $audioFile;
     }
@@ -116,6 +121,11 @@ class ConverterService
             'event' => 'delete',
             'properties' => ['file' => $audioFile->original_name],
         ]);
+
+        if ($audioFile->user_id) {
+            User::query()->where('id', $audioFile->user_id)->where('uploads_used', '>', 0)->decrement('uploads_used');
+        }
+
         $audioFile->forceFill(['status' => ConversionStatus::Deleted])->save();
         $audioFile->delete();
     }

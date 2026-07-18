@@ -27,8 +27,8 @@ use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
-Route::view('/privacy', 'legal.privacy', ['title' => __('legal.privacy_policy')])->name('privacy');
-Route::view('/terms', 'legal.terms', ['title' => __('legal.terms_of_service')])->name('terms');
+Route::view('/privacy', 'legal.privacy', ['title' => __('pages.privacy')])->name('privacy');
+Route::view('/terms', 'legal.terms', ['title' => __('pages.terms')])->name('terms');
 Route::post('/preferences/theme', [PreferenceController::class, 'theme'])->name('preferences.theme');
 Route::post('/preferences/locale', [PreferenceController::class, 'locale'])->name('preferences.locale');
 Route::post('/payment/midtrans/callback', [WebhookController::class, 'midtrans'])->name('payment.midtrans.callback');
@@ -75,9 +75,9 @@ Route::middleware(['auth', 'active', 'verified.config', 'role:user|admin', 'perm
     Route::post('/pricing/{plan}/checkout', [SubscriptionController::class, 'checkout'])->name('plans.checkout');
     Route::get('/orders/{order}', [SubscriptionController::class, 'showOrder'])->name('orders.show');
     Route::post('/orders/{order}/confirm', [SubscriptionController::class, 'confirmManualPayment'])->name('orders.confirm');
-    Route::get('/documentation', fn () => view('app.static', ['title' => __('app.documentation_title'), 'heading' => __('app.documentation_heading'), 'copy' => __('app.documentation_copy')]))->name('documentation');
-    Route::get('/integrations', fn () => view('app.integrations.index', ['title' => __('app.integrations_title')]))->name('integrations');
-    Route::get('/settings/integrations', fn () => view('app.integrations.settings', ['title' => __('app.integration_settings_title')]))->name('integrations.settings');
+    Route::get('/documentation', fn () => view('app.static', ['title' => __('pages.documentation'), 'heading' => __('app.documentation_heading'), 'copy' => __('app.documentation_copy')]))->name('documentation');
+    Route::get('/integrations', fn () => view('app.integrations.index', ['title' => __('pages.integrations')]))->name('integrations');
+    Route::get('/settings/integrations', fn () => view('app.integrations.settings', ['title' => __('pages.integration_settings')]))->name('integrations.settings');
     Route::get('/integrations/roblox', [RobloxIntegrationController::class, 'show'])->name('integrations.roblox');
     Route::get('/profile', [UserAppController::class, 'profile'])->name('profile');
 });
@@ -107,6 +107,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::post('/users/{user}/credits', [AdminUserController::class, 'addCredits'])->name('users.credits.add');
+    Route::post('/users/{user}/credits/set', [AdminUserController::class, 'setCredits'])->name('users.credits.set');
     Route::post('/users/{user}/plan', [AdminUserController::class, 'changePlan'])->name('users.plan.update');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::get('/history', [AdminConversionController::class, 'history'])->name('history');
@@ -123,7 +124,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::post('/community/badges/assign', [CommunityAdminController::class, 'assignBadge'])->name('community.badges.assign');
     Route::post('/community/users/{user}/ban', [CommunityAdminController::class, 'toggleBan'])->name('community.users.ban');
     Route::get('/settings', fn () => view('pages.converter.settings', [
-        'title' => __('app.settings_title'),
+        'title' => __('pages.settings'),
         'presets' => \App\Models\ConversionPreset::query()->orderBy('speed')->get(),
         'settings' => config('converter'),
     ]))->name('settings');
@@ -138,5 +139,5 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::get('/subscription/transactions', [SubscriptionAdminController::class, 'transactions'])->name('subscription.transactions');
     Route::get('/subscription/contact-settings', [SubscriptionAdminController::class, 'contactSettings'])->name('subscription.contact-settings');
     Route::put('/subscription/contact-settings', [SubscriptionAdminController::class, 'updateContactSettings'])->name('subscription.contact-settings.update');
-    Route::get('/profile', fn () => view('pages.profile', ['title' => __('app.profile_title')]))->name('profile');
+    Route::get('/profile', fn () => view('pages.profile', ['title' => __('pages.admin_profile')]))->name('profile');
 });

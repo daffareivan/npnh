@@ -10,7 +10,7 @@
     <meta property="og:description" content="{{ __('homepage.og_description') }}">
     <meta property="og:url" content="{{ route('home') }}">
     <meta property="og:type" content="website">
-    <title>{{ __('homepage.meta_title') }}</title>
+    <title>{{ __('pages.home') }} | {{ config('app.name') }}</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <script>

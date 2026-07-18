@@ -33,6 +33,11 @@
                             <span class="mb-1.5 block text-sm text-[#A3A3A3]">Credits</span>
                             <input name="credits" type="number" min="0" value="{{ $plan->credits }}" @disabled($plan->is_custom) class="h-11 w-full rounded-2xl border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none focus:border-white/30 disabled:opacity-50">
                         </label>
+                        <label>
+                            <span class="mb-1.5 block text-sm text-[#A3A3A3]">Max Uploads <span class="normal-case text-[#6B7280]">(kosongkan = unlimited)</span></span>
+                            <input name="max_uploads" type="number" min="0" value="{{ $plan->max_uploads }}" placeholder="Unlimited" class="h-11 w-full rounded-2xl border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none focus:border-white/30">
+                            <span class="mt-1 block text-xs text-[#6B7280]">Ditambahkan ke kuota upload user secara kumulatif setiap kali plan ini diaktifkan (tidak reset).</span>
+                        </label>
                     </div>
                     <label>
                         <span class="mb-1.5 block text-sm text-[#A3A3A3]">Sort Order</span>

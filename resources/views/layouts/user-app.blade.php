@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'NPNHCREATIVE' }}</title>
+    <title>{{ $title ?? __('pages.default') }} | {{ config('app.name') }}</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <script>
@@ -56,7 +56,9 @@
                 <a href="{{ route('app.integrations') }}" class="transition hover:text-[var(--foreground)]">{{ __('navigation.integrations') }}</a>
                 <a href="{{ route('app.integrations.settings') }}" class="transition hover:text-[var(--foreground)]">{{ __('navigation.settings') }}</a>
                 <a href="{{ route('app.pricing') }}" class="transition hover:text-[var(--foreground)]">{{ __('navigation.pricing') }}</a>
-                <a href="{{ route('app.documentation') }}" class="transition hover:text-[var(--foreground)]">{{ __('navigation.documentation') }}</a>
+                @if(auth()->user()?->can('admin.access'))
+                    <a href="{{ route('admin.dashboard.show') }}" class="transition hover:text-[var(--foreground)]">{{ __('navigation.dashboard') }}</a>
+                @endif
             </nav>
             <div class="flex items-center gap-2 sm:gap-3">
                 @if($allowThemeSwitch ?? true)
@@ -117,7 +119,9 @@
                 <a href="{{ route('app.integrations') }}" class="rounded-2xl px-3 py-2.5 hover:bg-[var(--hover)] hover:text-[var(--foreground)]">{{ __('navigation.integrations') }}</a>
                 <a href="{{ route('app.integrations.settings') }}" class="rounded-2xl px-3 py-2.5 hover:bg-[var(--hover)] hover:text-[var(--foreground)]">{{ __('navigation.settings') }}</a>
                 <a href="{{ route('app.pricing') }}" class="rounded-2xl px-3 py-2.5 hover:bg-[var(--hover)] hover:text-[var(--foreground)]">{{ __('navigation.pricing') }}</a>
-                <a href="{{ route('app.documentation') }}" class="rounded-2xl px-3 py-2.5 hover:bg-[var(--hover)] hover:text-[var(--foreground)]">{{ __('navigation.documentation') }}</a>
+                @if(auth()->user()?->can('admin.access'))
+                    <a href="{{ route('admin.dashboard.show') }}" class="rounded-2xl px-3 py-2.5 hover:bg-[var(--hover)] hover:text-[var(--foreground)]">{{ __('navigation.dashboard') }}</a>
+                @endif
                 <div class="my-2 h-px bg-white/10"></div>
 
                 @if($allowThemeSwitch ?? true)

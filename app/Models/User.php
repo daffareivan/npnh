@@ -62,12 +62,20 @@ class User extends Authenticatable implements MustVerifyEmail
             'community_banned_at' => 'datetime',
             'password' => 'hashed',
             'credits_balance' => 'integer',
+            'upload_limit' => 'integer',
+            'upload_unlimited' => 'boolean',
+            'uploads_used' => 'integer',
         ];
     }
 
     public function isSuspended(): bool
     {
         return $this->status === 'suspended';
+    }
+
+    public function hasReachedUploadLimit(): bool
+    {
+        return ! $this->upload_unlimited && $this->uploads_used >= $this->upload_limit;
     }
 
     public function audioFiles(): HasMany

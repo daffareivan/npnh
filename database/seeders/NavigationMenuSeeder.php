@@ -74,8 +74,6 @@ class NavigationMenuSeeder extends Seeder
                 'items' => [
                     ['title' => 'Open Converter', 'slug' => 'nav-converter-open', 'route_name' => 'app.converter', 'icon' => 'music', 'permission' => 'converter.convert'],
                     ['title' => 'Conversions', 'slug' => 'nav-converter-conversions', 'route_name' => 'admin.history', 'icon' => 'database', 'permission' => 'admin.conversions.manage'],
-                    ['title' => 'Downloads', 'slug' => 'nav-converter-downloads', 'route_name' => 'admin.history', 'icon' => 'download', 'permission' => 'admin.conversions.manage'],
-                    ['title' => 'Roblox Upload', 'slug' => 'nav-converter-roblox-upload', 'route_name' => 'admin.history', 'icon' => 'cloud', 'permission' => 'admin.conversions.manage', 'module' => 'roblox'],
                 ],
             ],
             [
@@ -87,7 +85,6 @@ class NavigationMenuSeeder extends Seeder
                     ['title' => 'Subscriptions', 'slug' => 'nav-business-subscriptions', 'route_name' => 'admin.subscription.orders', 'icon' => 'package', 'permission' => 'admin.credits.manage'],
                     ['title' => 'Plans', 'slug' => 'nav-business-plans', 'route_name' => 'admin.subscription.plans', 'icon' => 'package', 'permission' => 'admin.credits.manage'],
                     ['title' => 'Credits', 'slug' => 'nav-business-credits', 'route_name' => 'admin.credit-settings.edit', 'icon' => 'credit-card', 'permission' => 'admin.credits.manage'],
-                    ['title' => 'Payments', 'slug' => 'nav-business-payments', 'route_name' => 'admin.subscription.orders', 'icon' => 'receipt', 'permission' => 'admin.credits.manage'],
                     ['title' => 'Transactions', 'slug' => 'nav-business-transactions', 'route_name' => 'admin.subscription.transactions', 'icon' => 'activity', 'permission' => 'admin.credits.manage'],
                 ],
             ],

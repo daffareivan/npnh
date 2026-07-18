@@ -13,6 +13,7 @@ class Plan extends Model
         'slug',
         'price',
         'credits',
+        'max_uploads',
         'badge',
         'description',
         'is_active',
@@ -27,6 +28,7 @@ class Plan extends Model
         return [
             'price' => 'integer',
             'credits' => 'integer',
+            'max_uploads' => 'integer',
             'is_active' => 'boolean',
             'is_custom' => 'boolean',
             'features' => 'array',

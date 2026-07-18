@@ -17,7 +17,7 @@ class RobloxIntegrationController extends Controller
     public function show(Request $request): View
     {
         return view('app.integrations.roblox', [
-            'title' => 'Roblox Integration',
+            'title' => __('pages.roblox_integration'),
             'account' => $request->user()->robloxAccount,
             'creatorHubUrl' => config('services.roblox.creator_hub_url'),
         ]);
