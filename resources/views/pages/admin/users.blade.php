@@ -10,9 +10,13 @@
         editUser: { id: null, name: '', email: '', role: 'user', status: 'active', password: '' },
         deleteOpen: false,
         deleteUser: { id: null, name: '' },
+        planOpen: false,
+        planUser: { id: null, name: '', planId: null, customPlanName: '' },
+        customPlanIds: [{{ $plans->where('is_custom', true)->pluck('id')->implode(',') }}],
         openEdit(user) { this.editUser = { ...user, password: '' }; this.editOpen = true },
         openDelete(user) { this.deleteUser = user; this.deleteOpen = true },
-    }" @keydown.escape.window="createOpen = false; editOpen = false; deleteOpen = false">
+        openPlan(user) { this.planUser = { customPlanName: '', ...user }; this.planOpen = true },
+    }" @keydown.escape.window="createOpen = false; editOpen = false; deleteOpen = false; planOpen = false">
 
         <div class="mb-5 flex items-center justify-end">
             <button type="button" @click="createOpen = true" class="wx-btn-primary px-5 py-2.5 text-sm font-semibold">+ Add User</button>
@@ -39,7 +43,7 @@
             <table class="min-w-full">
                 <thead class="border-b border-white/[0.06]">
                     <tr>
-                        @foreach(['Avatar','Name','Email','Role','Status','Credits','Total Conversion','Created At','Action'] as $h)<th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-[0.14em] text-[#6B7280]">{{ $h }}</th>@endforeach
+                        @foreach(['Avatar','Name','Email','Role','Status','Plan','Credits','Total Conversion','Created At','Action'] as $h)<th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-[0.14em] text-[#6B7280]">{{ $h }}</th>@endforeach
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/[0.06]">
@@ -50,12 +54,14 @@
                             <td class="px-5 py-4 text-sm text-[#A3A3A3]">{{ $user->email }}</td>
                             <td class="px-5 py-4 text-sm text-[#A3A3A3]">{{ $user->roles->pluck('name')->join(', ') }}</td>
                             <td class="px-5 py-4"><span class="rounded-full px-2 py-1 text-xs {{ $user->status === 'active' ? 'bg-success-50 text-success-600' : 'bg-error-50 text-error-600' }}">{{ ucfirst($user->status) }}</span></td>
+                            <td class="px-5 py-4 text-sm text-[#A3A3A3]">{{ $user->activeSubscription?->displayPlanName() ?? 'Free' }}</td>
                             <td class="px-5 py-4 text-sm font-medium text-white">{{ number_format($user->credits_balance) }}</td>
                             <td class="px-5 py-4 text-sm text-[#A3A3A3]">{{ $user->audio_files_count }}</td>
                             <td class="px-5 py-4 text-sm text-[#A3A3A3]">{{ $user->created_at->format('M d, Y') }}</td>
                             <td class="px-5 py-4">
                                 <div class="flex flex-wrap gap-3">
                                     <button type="button" @click="openEdit({ id: {{ $user->id }}, name: @js($user->name), email: @js($user->email), role: @js($user->hasRole('admin') ? 'admin' : 'user'), status: @js($user->status) })" class="text-xs font-semibold text-brand-500">Edit</button>
+                                    <button type="button" @click="openPlan({ id: {{ $user->id }}, name: @js($user->name), planId: {{ $user->activeSubscription?->plan_id ?? 'null' }}, customPlanName: @js($user->activeSubscription?->custom_plan_name ?? '') })" class="text-xs font-semibold text-blue-400">Change Plan</button>
                                     <button type="button" @click="openDelete({ id: {{ $user->id }}, name: @js($user->name) })" class="text-xs font-semibold text-error-500">Delete</button>
                                 </div>
                                 <form method="POST" action="{{ route('admin.users.credits.add', $user) }}" class="mt-2 flex items-center gap-1.5">
@@ -85,12 +91,14 @@
                     </div>
                     <dl class="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 text-xs text-[#A3A3A3]">
                         <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">Role</dt><dd class="mt-0.5 text-white/80">{{ $user->roles->pluck('name')->join(', ') ?: '-' }}</dd></div>
+                        <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">Plan</dt><dd class="mt-0.5 text-white/80">{{ $user->activeSubscription?->displayPlanName() ?? 'Free' }}</dd></div>
                         <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">Credits</dt><dd class="mt-0.5 font-medium text-white">{{ number_format($user->credits_balance) }}</dd></div>
                         <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">Conversions</dt><dd class="mt-0.5 text-white/80">{{ $user->audio_files_count }}</dd></div>
                         <div><dt class="uppercase tracking-[0.1em] text-[#6B7280]">Created</dt><dd class="mt-0.5 text-white/80">{{ $user->created_at->format('M d, Y') }}</dd></div>
                     </dl>
                     <div class="mt-4 flex flex-wrap gap-3 border-t border-white/[0.06] pt-3">
                         <button type="button" @click="openEdit({ id: {{ $user->id }}, name: @js($user->name), email: @js($user->email), role: @js($user->hasRole('admin') ? 'admin' : 'user'), status: @js($user->status) })" class="text-sm font-semibold text-brand-500">Edit</button>
+                        <button type="button" @click="openPlan({ id: {{ $user->id }}, name: @js($user->name), planId: {{ $user->activeSubscription?->plan_id ?? 'null' }}, customPlanName: @js($user->activeSubscription?->custom_plan_name ?? '') })" class="text-sm font-semibold text-blue-400">Change Plan</button>
                         <button type="button" @click="openDelete({ id: {{ $user->id }}, name: @js($user->name) })" class="text-sm font-semibold text-error-500">Delete</button>
                     </div>
                     <form method="POST" action="{{ route('admin.users.credits.add', $user) }}" class="mt-3 flex flex-wrap items-center gap-1.5 border-t border-white/[0.06] pt-3">
@@ -191,6 +199,35 @@
                     <div class="mt-4 flex justify-end gap-2">
                         <button type="button" @click="editOpen = false" class="wx-btn-secondary px-5 py-2.5 text-sm">Cancel</button>
                         <button type="submit" class="wx-btn-primary px-5 py-2.5 text-sm font-semibold">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- Change Plan Modal --}}
+        <div x-show="planOpen" x-cloak class="fixed inset-0 z-99999 flex items-end justify-center overflow-y-auto sm:items-center sm:p-5" style="display: none;">
+            <div @click="planOpen = false" class="fixed inset-0 h-full w-full bg-black/60 backdrop-blur-sm" x-transition.opacity></div>
+            <div @click.stop class="wx-card relative w-full max-w-sm p-6" x-transition>
+                <h3 class="text-lg font-semibold text-white">Change Plan</h3>
+                <p class="mt-1 text-xs text-[#6B7280]" x-text="planUser.name"></p>
+                <p class="mt-2 text-sm text-[#A3A3A3]">Switching plans immediately activates the new plan and grants its plan credits. The user's current plan is deactivated.</p>
+                <form method="POST" :action="'{{ url('/admin/users') }}/' + planUser.id + '/plan'" class="mt-5 flex flex-col gap-3">
+                    @csrf
+                    <div>
+                        <label class="mb-1 block text-xs font-medium text-[#A3A3A3]">Plan</label>
+                        <select name="plan_id" x-model="planUser.planId" required class="h-11 w-full rounded-2xl border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none focus:border-white/30">
+                            @foreach($plans as $plan)
+                                <option value="{{ $plan->id }}">{{ $plan->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div x-show="customPlanIds.includes(Number(planUser.planId))" x-cloak>
+                        <label class="mb-1 block text-xs font-medium text-[#A3A3A3]">Custom Plan Name <span class="normal-case text-[#6B7280]">(optional, shown instead of "Custom")</span></label>
+                        <input type="text" name="custom_plan_name" x-model="planUser.customPlanName" maxlength="100" placeholder="e.g. Custom - Team ABC" class="h-11 w-full rounded-2xl border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none focus:border-white/30">
+                    </div>
+                    <div class="mt-4 flex justify-end gap-2">
+                        <button type="button" @click="planOpen = false" class="wx-btn-secondary px-5 py-2.5 text-sm">Cancel</button>
+                        <button type="submit" class="wx-btn-primary px-5 py-2.5 text-sm font-semibold">Change Plan</button>
                     </div>
                 </form>
             </div>

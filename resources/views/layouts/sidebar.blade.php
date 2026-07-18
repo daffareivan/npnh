@@ -16,8 +16,8 @@
     @mouseleave="$store.sidebar.setHovered(false)">
     <div class="flex pb-7 pt-8" :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ? 'md:justify-center' : 'justify-start'">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
-            <span class="wx-pill grid size-10 place-items-center rounded-2xl">
-                {!! \App\Helpers\MenuHelper::getIconSvg('audio-lines') !!}
+            <span class="grid size-10 place-items-center overflow-hidden rounded-full">
+                <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-contain">
             </span>
             <span x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen" class="font-semibold tracking-tight">NPNHCREATIVE</span>
         </a>

@@ -12,6 +12,7 @@ class Subscription extends Model
     protected $fillable = [
         'user_id',
         'plan_id',
+        'custom_plan_name',
         'invoice_number',
         'midtrans_order_id',
         'midtrans_transaction_id',
@@ -50,5 +51,10 @@ class Subscription extends Model
     public function invoice(): HasOne
     {
         return $this->hasOne(Invoice::class);
+    }
+
+    public function displayPlanName(): string
+    {
+        return $this->custom_plan_name ?: ($this->plan?->name ?? 'Free');
     }
 }

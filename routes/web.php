@@ -107,6 +107,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::post('/users/{user}/credits', [AdminUserController::class, 'addCredits'])->name('users.credits.add');
+    Route::post('/users/{user}/plan', [AdminUserController::class, 'changePlan'])->name('users.plan.update');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::get('/history', [AdminConversionController::class, 'history'])->name('history');
     Route::get('/analytics', [AdminConversionController::class, 'analytics'])->name('analytics');

@@ -35,9 +35,9 @@ class SubscriptionService
         return $this->ensureFreeSubscription($user)->loadMissing('plan')->plan;
     }
 
-    public function activatePlan(User $user, Plan $plan, string $source = 'subscription'): Subscription
+    public function activatePlan(User $user, Plan $plan, string $source = 'subscription', ?string $customPlanName = null): Subscription
     {
-        return DB::transaction(function () use ($user, $plan, $source): Subscription {
+        return DB::transaction(function () use ($user, $plan, $source, $customPlanName): Subscription {
             Subscription::query()
                 ->where('user_id', $user->id)
                 ->where('status', 'active')
@@ -46,6 +46,7 @@ class SubscriptionService
             $subscription = Subscription::query()->create([
                 'user_id' => $user->id,
                 'plan_id' => $plan->id,
+                'custom_plan_name' => $plan->is_custom ? $customPlanName : null,
                 'status' => 'active',
                 'started_at' => now(),
                 'expired_at' => null,

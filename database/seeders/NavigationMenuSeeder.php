@@ -97,7 +97,6 @@ class NavigationMenuSeeder extends Seeder
                 'icon' => 'message-circle',
                 'sort_order' => 40,
                 'items' => [
-                    ['title' => 'Homepage CMS', 'slug' => 'nav-content-homepage', 'route_name' => 'admin.content.homepage-reviews', 'icon' => 'layout-template', 'permission' => 'admin.settings.manage'],
                     ['title' => 'Reviews', 'slug' => 'nav-content-reviews', 'route_name' => 'admin.content.homepage-reviews', 'icon' => 'star', 'permission' => 'admin.settings.manage'],
                     ['title' => 'Comments', 'slug' => 'nav-content-comments', 'route_name' => 'admin.community.comments', 'icon' => 'message-circle', 'permission' => 'admin.settings.manage'],
                     ['title' => 'Reports', 'slug' => 'nav-content-reports', 'route_name' => 'admin.community.reports', 'icon' => 'shield-alert', 'permission' => 'admin.settings.manage'],

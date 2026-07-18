@@ -1,13 +1,12 @@
 <?php
 
-namespace App\View\Components\header;
+namespace App\View\Components\Header;
 
-use App\Models\ActivityLog;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class NotificationDropdown extends Component
+class UserDropdown extends Component
 {
     /**
      * Create a new component instance.
@@ -22,8 +21,6 @@ class NotificationDropdown extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.header.notification-dropdown', [
-            'notifications' => ActivityLog::query()->latest()->limit(8)->get(),
-        ]);
+        return view('components.header.user-dropdown');
     }
 }

@@ -29,7 +29,19 @@ class GoogleAuthController extends Controller
             ->first();
 
         if (! $user) {
-            $user = User::query()->where('email', $googleUser->getEmail())->first();
+            $existingByEmail = User::query()->where('email', $googleUser->getEmail())->first();
+
+            if ($existingByEmail) {
+                // Only auto-link to an existing account if Google has verified the email.
+                // Otherwise an attacker could take over an account just by knowing its email address.
+                abort_unless(
+                    (bool) ($googleUser->user['verified_email'] ?? false),
+                    403,
+                    'This Google account\'s email is not verified by Google, so it cannot be linked to an existing account.'
+                );
+
+                $user = $existingByEmail;
+            }
         }
 
         if ($user) {

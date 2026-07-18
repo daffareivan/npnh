@@ -60,7 +60,7 @@ class ConverterApiController extends Controller
 
     public function history(Request $request): AnonymousResourceCollection
     {
-        return AudioFileResource::collection($this->audioFiles->paginate($request->user()?->id));
+        return AudioFileResource::collection($this->audioFiles->paginate($request->user()->id));
     }
 
     public function destroy(AudioFile $audioFile): Response

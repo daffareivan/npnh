@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Plan;
 use App\Models\User;
 use App\Services\CreditService;
+use App\Services\SubscriptionService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +22,7 @@ class AdminUserController extends Controller
         return view('pages.admin.users', [
             'title' => 'Users',
             'users' => User::query()
-                ->with('roles')
+                ->with(['roles', 'activeSubscription.plan'])
                 ->withCount('audioFiles')
                 ->when($request->string('search')->toString(), function ($query, $search): void {
                     $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
@@ -30,10 +32,11 @@ class AdminUserController extends Controller
                 ->latest()
                 ->paginate(10)
                 ->withQueryString(),
+            'plans' => Plan::query()->active()->ordered()->get(),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, CreditService $credits): RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -54,6 +57,7 @@ class AdminUserController extends Controller
         ]);
 
         $user->syncRoles([$data['role']]);
+        $credits->grant($user, $credits->get(CreditService::REGISTRATION_BONUS), 'Registration Bonus');
 
         return back()->with('status', "User {$user->name} created.");
     }
@@ -71,6 +75,19 @@ class AdminUserController extends Controller
         ]);
 
         return back()->with('status', "Added {$data['amount']} credits to {$user->name}.");
+    }
+
+    public function changePlan(Request $request, User $user, SubscriptionService $subscriptions): RedirectResponse
+    {
+        $data = $request->validate([
+            'plan_id' => ['required', 'exists:plans,id'],
+            'custom_plan_name' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $plan = Plan::query()->findOrFail($data['plan_id']);
+        $subscription = $subscriptions->activatePlan($user, $plan, 'admin', $data['custom_plan_name'] ?? null);
+
+        return back()->with('status', "Moved {$user->name} to the {$subscription->displayPlanName()} plan.");
     }
 
     public function update(Request $request, User $user): RedirectResponse

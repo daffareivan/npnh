@@ -12,7 +12,13 @@
       "Bash(npx --no-install vite build)",
       "Bash(taskkill //F //PID 16976)",
       "Bash(grep -n 'fillable\\\\|protected $table' -A 20 /d/converter/app/Models/AudioFile.php)",
-      "Bash(php -l routes/web.php)"
+      "Bash(php -l routes/web.php)",
+      "Bash(xargs -I{} sh -c 'echo \"{}:\"; grep \"@extends\" \"{}\"')",
+      "Bash(python3 -c ' *)",
+      "Bash(identify logo.png)",
+      "Bash(php -r ' *)",
+      "Bash(git mv *)",
+      "Bash(composer dump-autoload *)"
     ]
   }
 }

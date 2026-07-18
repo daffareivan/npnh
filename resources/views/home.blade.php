@@ -67,8 +67,8 @@
     <header class="fixed inset-x-0 top-0 z-50 transition-all duration-300" :class="scrolled ? 'border-b shadow-2xl backdrop-blur-xl' : 'bg-transparent'" :style="scrolled ? 'background: color-mix(in srgb, var(--topbar) 82%, transparent); border-color: var(--border); box-shadow: 0 18px 60px var(--shadow);' : ''">
         <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Main navigation">
             <a href="{{ route('home') }}" class="group flex items-center gap-3">
-                <span class="wx-pill grid size-10 place-items-center overflow-hidden rounded-2xl transition">
-                    <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-cover">
+                <span class="grid size-10 place-items-center overflow-hidden rounded-full transition">
+                    <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-contain">
                 </span>
                 <span class="text-base font-semibold tracking-tight">NPNHCREATIVE</span>
             </a>

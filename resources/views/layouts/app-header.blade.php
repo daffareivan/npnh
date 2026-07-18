@@ -24,7 +24,9 @@
             </button>
 
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 md:hidden">
-                <span class="wx-pill grid size-10 place-items-center rounded-2xl">{!! \App\Helpers\MenuHelper::getIconSvg('audio-lines') !!}</span>
+                <span class="grid size-10 place-items-center overflow-hidden rounded-full">
+                    <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-contain">
+                </span>
                 <span class="font-semibold">NPNHCREATIVE</span>
             </a>
 

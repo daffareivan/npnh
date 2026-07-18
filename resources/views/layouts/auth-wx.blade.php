@@ -101,10 +101,10 @@
             <div class="wx-decor-glow pointer-events-none absolute -left-32 top-24 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl"></div>
             <div class="wx-decor-glow pointer-events-none absolute -right-28 bottom-20 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl"></div>
             <div class="wx-decor-glow pointer-events-none absolute inset-0 opacity-[.07] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:22px_22px]"></div>
-            <div class="relative z-20 flex items-center justify-between gap-4">
+            <div class="relative z-20 mb-10 flex items-center justify-between gap-4">
             <a href="{{ route('home') }}" class="flex items-center gap-3">
-                <span class="grid size-11 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] text-white">
-                    <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-cover">
+                <span class="grid size-11 place-items-center overflow-hidden rounded-full">
+                    <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-contain">
                 </span>
                 <span class="font-semibold">NPNHCREATIVE</span>
             </a>
@@ -224,7 +224,7 @@
         <section class="flex items-center justify-center px-4 py-10 sm:px-6">
             <div class="w-full max-w-md">
                 <div class="mb-8 flex items-center justify-between gap-3 md:hidden">
-                    <a href="{{ route('home') }}" class="flex items-center gap-3"><span class="wx-pill grid size-10 place-items-center overflow-hidden rounded-2xl"><img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-cover"></span><span class="font-semibold">NPNHCREATIVE</span></a>
+                    <a href="{{ route('home') }}" class="flex items-center gap-3"><span class="grid size-10 place-items-center overflow-hidden rounded-full"><img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-contain"></span><span class="font-semibold">NPNHCREATIVE</span></a>
                     <div class="flex items-center gap-2">
                         @if($allowThemeSwitch ?? true)
                             <form method="POST" action="{{ route('preferences.theme') }}">

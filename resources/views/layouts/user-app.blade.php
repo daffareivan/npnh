@@ -44,8 +44,8 @@
     }">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <a href="{{ route('app.dashboard') }}" class="flex items-center gap-3">
-                <span class="wx-pill grid size-9 place-items-center rounded-2xl">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
+                <span class="grid size-9 place-items-center overflow-hidden rounded-full">
+                    <img src="{{ asset('images/logo.png') }}" alt="NPNHCREATIVE" class="size-full object-contain">
                 </span>
                 <span class="font-semibold tracking-tight">NPNHCREATIVE</span>
             </a>
