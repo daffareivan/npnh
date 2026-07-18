@@ -10,6 +10,8 @@ return [
     'max_segment_seconds' => (int) env('CONVERTER_MAX_SEGMENT_SECONDS', 360),
     'auto_delete_files' => (bool) env('CONVERTER_AUTO_DELETE_FILES', false),
     'default_output_format' => env('CONVERTER_DEFAULT_OUTPUT_FORMAT', 'ogg'),
-    'ffmpeg_binary' => env('FFMPEG_BINARY', 'ffmpeg'),
-    'ffprobe_binary' => env('FFPROBE_BINARY', 'ffprobe'),
+    'node_binary' => env('NODE_BINARY', 'node'),
+    'audio_engine_path' => env('AUDIO_ENGINE_PATH', base_path('audio-engine/engine.mjs')),
+    'audio_engine_timeout' => (int) env('AUDIO_ENGINE_TIMEOUT', 900),
+    'ogg_vbr_quality' => (float) env('CONVERTER_OGG_VBR_QUALITY', 3),
 ];

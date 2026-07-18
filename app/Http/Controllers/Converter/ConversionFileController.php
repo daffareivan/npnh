@@ -12,10 +12,9 @@ use App\Models\ConversionFile;
 use App\Models\DownloadLog;
 use App\Services\CreditService;
 use App\Services\Roblox\RobloxAssetService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 use ZipArchive;
@@ -69,7 +68,7 @@ class ConversionFileController extends Controller
         return $response;
     }
 
-    public function downloadAll(AudioFile $audioFile, Request $request, CreditService $credits): Response|RedirectResponse
+    public function downloadAll(AudioFile $audioFile, Request $request, CreditService $credits): BinaryFileResponse
     {
         $this->authorize('view', $audioFile);
 

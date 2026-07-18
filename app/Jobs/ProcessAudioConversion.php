@@ -9,7 +9,7 @@ use App\Models\AudioFile;
 use App\Models\ConversionJob;
 use App\Repositories\AudioFileRepository;
 use App\Services\AudioMetadataService;
-use App\Services\FfmpegAudioConverter;
+use App\Services\NodeAudioConverter;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Storage;
@@ -26,7 +26,7 @@ class ProcessAudioConversion implements ShouldQueue
     public function handle(
         AudioFileRepository $audioFiles,
         AudioMetadataService $metadata,
-        FfmpegAudioConverter $converter,
+        NodeAudioConverter $converter,
     ): void {
         $audioFile = AudioFile::query()->findOrFail($this->audioFileId);
         $jobRecord = ConversionJob::query()->where('audio_file_id', $audioFile->id)->latest()->first();
@@ -44,11 +44,15 @@ class ProcessAudioConversion implements ShouldQueue
         Storage::makeDirectory(dirname($outputPath));
 
         $audioFiles->updateStatus($audioFile, ConversionStatus::Encoding);
-        $converter->convert($inputPath, Storage::path($outputPath), (float) $audioFile->speed, $audioFile->amplify_db);
+        $converted = $converter->convert($inputPath, Storage::path($outputPath), (float) $audioFile->speed, $audioFile->amplify_db);
 
         $audioFile->forceFill([
+            // Overwrite the original file's duration (set above, pre speed-change)
+            // with the actual converted output's duration — they diverge whenever
+            // speed != 1, and downstream split-eligibility depends on the latter.
+            'duration' => $converted['duration'] ?: $audioFile->duration,
             'output_path' => $outputPath,
-            'output_size' => Storage::size($outputPath),
+            'output_size' => $converted['size'] ?: Storage::size($outputPath),
             'status' => ConversionStatus::Finished,
             'progress' => ConversionStatus::Finished->progress(),
             'finished_at' => now(),

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Audio Engine</title></head>
+<body>
+<script>
+// Headless DSP + encode pipeline. Ported from D:\studio-local\audio-studio.html
+// (buildEffectChain / renderOffline / normalizeBuffer / splitBuffer) so the
+// speed+pitch and bass-boost behavior is byte-identical to the reference tool.
+// No ffmpeg anywhere in this file — decode/render via Web Audio API (Chromium),
+// encode to Ogg Vorbis via the WasmMediaEncoder WASM build.
+
+// bass shelf @100Hz mirrors the reference tool's single-node effect chain
+function buildEffectChain(ctx, bassGainDb) {
+  const input = ctx.createGain();
+  const bassShelf = ctx.createBiquadFilter();
+  bassShelf.type = 'lowshelf';
+  bassShelf.frequency.value = 100;
+  bassShelf.gain.value = bassGainDb;
+  const output = ctx.createGain();
+  input.connect(bassShelf);
+  bassShelf.connect(output);
+  return { input, output };
+}
+
+async function renderOffline(buffer, speed, bassGainDb) {
+  const tailPad = 0.3;
+  const outDuration = buffer.duration / speed + tailPad;
+  const channels = buffer.numberOfChannels;
+  const offlineCtx = new OfflineAudioContext(
+    channels,
+    Math.ceil(outDuration * buffer.sampleRate),
+    buffer.sampleRate
+  );
+  const chain = buildEffectChain(offlineCtx, bassGainDb);
+  chain.output.connect(offlineCtx.destination);
+  const src = offlineCtx.createBufferSource();
+  src.buffer = buffer;
+  src.playbackRate.value = speed;
+  src.connect(chain.input);
+  src.start(0);
+  return offlineCtx.startRendering();
+}
+
+function normalizeBuffer(buffer, targetDb) {
+  let peak = 0;
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    const data = buffer.getChannelData(ch);
+    for (let i = 0; i < data.length; i++) {
+      const abs = Math.abs(data[i]);
+      if (abs > peak) peak = abs;
+    }
+  }
+  if (peak <= 0) return;
+  const gain = Math.pow(10, targetDb / 20) / peak;
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    const data = buffer.getChannelData(ch);
+    for (let i = 0; i < data.length; i++) data[i] *= gain;
+  }
+}
+
+function sliceBuffer(buffer, startSec, endSec) {
+  const sampleRate = buffer.sampleRate;
+  const startSample = Math.floor(startSec * sampleRate);
+  const endSample = Math.floor(endSec * sampleRate);
+  const length = Math.max(1, endSample - startSample);
+  const out = new AudioBuffer({ length, sampleRate, numberOfChannels: buffer.numberOfChannels });
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    out.copyToChannel(buffer.getChannelData(ch).subarray(startSample, startSample + length), ch);
+  }
+  return out;
+}
+
+function splitBuffer(buffer, maxPartSec) {
+  if (buffer.duration <= maxPartSec) return [buffer];
+  const n = Math.ceil(buffer.duration / maxPartSec);
+  const partLen = buffer.duration / n;
+  const parts = [];
+  for (let i = 0; i < n; i++) {
+    const startSec = i * partLen;
+    const endSec = i === n - 1 ? buffer.duration : (i + 1) * partLen;
+    parts.push(sliceBuffer(buffer, startSec, endSec));
+  }
+  return parts;
+}
+
+function computePeaks(buffer, samples) {
+  const channels = [];
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) channels.push(buffer.getChannelData(ch));
+  const total = buffer.length;
+  const bucketSize = Math.max(1, Math.floor(total / samples));
+  const peaks = [];
+  for (let i = 0; i < samples && (i * bucketSize) < total; i++) {
+    const start = i * bucketSize;
+    const end = Math.min(total, start + bucketSize);
+    let peak = 0;
+    for (let ch = 0; ch < channels.length; ch++) {
+      const data = channels[ch];
+      for (let j = start; j < end; j++) {
+        const abs = Math.abs(data[j]);
+        if (abs > peak) peak = abs;
+      }
+    }
+    peaks.push(Math.round(peak * 1000) / 1000);
+  }
+  return peaks;
+}
+
+function bufferToBytes(buffer) {
+  // Interleave to Float32Array pairs per channel, matching WasmMediaEncoder's encode(Float32Array[]) contract
+  const channels = [];
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) channels.push(buffer.getChannelData(ch));
+  return channels;
+}
+
+async function encodeOgg(buffer, vbrQuality) {
+  const encoder = await WasmMediaEncoder.createOggEncoder();
+  const channels = Math.min(2, buffer.numberOfChannels);
+  encoder.configure({ channels, sampleRate: buffer.sampleRate, vbrQuality });
+  const channelData = bufferToBytes(buffer).slice(0, channels);
+  const blockSize = 4096;
+  const chunks = [];
+  const length = buffer.length;
+  for (let i = 0; i < length; i += blockSize) {
+    const slice = channelData.map((data) => data.subarray(i, Math.min(length, i + blockSize)));
+    const out = encoder.encode(slice);
+    if (out.length > 0) chunks.push(out.slice());
+  }
+  const tail = encoder.finalize();
+  if (tail.length > 0) chunks.push(tail.slice());
+  let totalLen = 0;
+  for (const c of chunks) totalLen += c.length;
+  const merged = new Uint8Array(totalLen);
+  let offset = 0;
+  for (const c of chunks) { merged.set(c, offset); offset += c.length; }
+  return merged;
+}
+
+function bytesToBase64(bytes) {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+function base64ToBytes(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+let audioCtx;
+async function decodeBase64Audio(base64) {
+  if (!audioCtx) audioCtx = new OfflineAudioContext(2, 1, 44100);
+  const bytes = base64ToBytes(base64);
+  return audioCtx.decodeAudioData(bytes.buffer);
+}
+
+// ================= Entry points invoked from Node via page.evaluate =================
+
+window.__probe = async function (base64) {
+  const buffer = await decodeBase64Audio(base64);
+  return { duration: buffer.duration, sampleRate: buffer.sampleRate, channels: buffer.numberOfChannels };
+};
+
+window.__convert = async function (base64, speed, bassGainDb, vbrQuality) {
+  const original = await decodeBase64Audio(base64);
+  const rendered = await renderOffline(original, speed, bassGainDb);
+  normalizeBuffer(rendered, -1);
+  const encoded = await encodeOgg(rendered, vbrQuality);
+  return { duration: rendered.duration, base64: bytesToBase64(encoded) };
+};
+
+window.__split = async function (base64, maxPartSec, vbrQuality) {
+  const buffer = await decodeBase64Audio(base64);
+  const parts = splitBuffer(buffer, maxPartSec);
+  const out = [];
+  for (const part of parts) {
+    const encoded = await encodeOgg(part, vbrQuality);
+    out.push({ duration: part.duration, base64: bytesToBase64(encoded) });
+  }
+  return { parts: out };
+};
+
+window.__peaks = async function (base64, samples) {
+  const buffer = await decodeBase64Audio(base64);
+  return { peaks: computePeaks(buffer, samples) };
+};
+</script>
+</body>
+</html>

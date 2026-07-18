@@ -4,7 +4,7 @@
 
 ## ✨ Key Features
 
-* 🎧 **Audio Conversion Pipeline** — Upload audio, process it asynchronously with FFmpeg (speed, amplify, format), and track job status/progress in real time.
+* 🎧 **Audio Conversion Pipeline** — Upload audio, process it asynchronously with a headless-Chromium (Web Audio API) engine (speed/pitch, bass boost, format), and track job status/progress in real time.
 * 🎛️ **Conversion Presets** — Admin-managed speed/amplify presets applied per upload.
 * 🎮 **Roblox Integration** — Connect a Roblox account via OAuth, and upload converted audio directly as a Roblox asset.
 * 💳 **Credit System** — Downloads and conversions consume credits; balances, history, and admin-configurable costs are tracked per user.
@@ -18,7 +18,7 @@
 
 * **Laravel 12** (PHP 8.4)
 * **Tailwind CSS v4** + **Alpine.js** + **Vite**
-* **FFmpeg / FFprobe** for audio conversion
+* **Node.js + Puppeteer (headless Chromium)** for audio conversion — see `audio-engine/` (no ffmpeg dependency)
 * **spatie/laravel-permission** for roles & permissions
 * **laravel/socialite** for Google OAuth
 * **midtrans/midtrans-php** for payments
@@ -28,8 +28,7 @@
 
 * **PHP 8.4+** with the extensions Laravel requires
 * **Composer**
-* **Node.js 18+** and **npm**
-* **FFmpeg** and **FFprobe** binaries available on the system (or configured via `FFMPEG_BINARY` / `FFPROBE_BINARY`)
+* **Node.js 18+** and **npm** — also used to run the `audio-engine/` conversion engine (`cd audio-engine && npm install` once; downloads a bundled Chromium via Puppeteer)
 * **Database** — MySQL (default) or any Laravel-supported driver
 * A queue worker running (`CONVERTER_QUEUE`, default `audio-conversion`) to process conversion jobs
 
@@ -40,6 +39,14 @@
 ```bash
 composer install
 npm install
+cd audio-engine && npm install && cd ..
+```
+
+The `audio-engine` install downloads a bundled Chromium via Puppeteer (~300MB) — this is what the conversion pipeline uses instead of ffmpeg. On a minimal Ubuntu server, headless Chromium needs a handful of shared libraries that aren't installed by default (`libnss3`, `libatk1.0-0`, `libgbm1`, `libasound2`, etc.) — install them with:
+
+```bash
+sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+  libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2
 ```
 
 ### 2. Configure environment
@@ -59,8 +66,8 @@ DB_DATABASE=your_database
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 
-FFMPEG_BINARY=ffmpeg
-FFPROBE_BINARY=ffprobe
+NODE_BINARY=node
+AUDIO_ENGINE_PATH=/absolute/path/to/audio-engine/engine.mjs
 
 # Optional integrations
 GOOGLE_CLIENT_ID=
@@ -139,7 +146,7 @@ converter/
 │   │   ├── Roblox/              # OAuth, account, asset, token, user services
 │   │   ├── ConverterService.php # Upload/convert/download/delete pipeline
 │   │   ├── CreditService.php    # Credit balance & deduction
-│   │   ├── FfmpegAudioConverter.php
+│   │   ├── NodeAudioConverter.php # Headless-Chromium conversion engine bridge (audio-engine/)
 │   │   ├── MidtransService.php / PaymentService.php / SubscriptionService.php
 │   │   └── CommunityService.php
 │   └── Repositories/            # AudioFileRepository, etc.

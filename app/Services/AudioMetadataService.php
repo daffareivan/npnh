@@ -10,14 +10,10 @@ class AudioMetadataService
 {
     public function duration(string $path): ?float
     {
-        $result = Process::run([
-            config('converter.ffprobe_binary'),
-            '-v',
-            'error',
-            '-show_entries',
-            'format=duration',
-            '-of',
-            'default=noprint_wrappers=1:nokey=1',
+        $result = Process::timeout((int) config('converter.audio_engine_timeout'))->run([
+            config('converter.node_binary'),
+            config('converter.audio_engine_path'),
+            'probe',
             $path,
         ]);
 
@@ -25,8 +21,8 @@ class AudioMetadataService
             return null;
         }
 
-        $duration = trim($result->output());
+        $data = json_decode($result->output(), true);
 
-        return is_numeric($duration) ? (float) $duration : null;
+        return isset($data['duration']) ? (float) $data['duration'] : null;
     }
 }

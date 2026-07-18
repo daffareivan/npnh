@@ -1,0 +1,13 @@
+{
+  "name": "audio-engine",
+  "version": "1.0.0",
+  "description": "Headless (Puppeteer/Chromium) audio conversion engine for NPNHCREATIVE — no ffmpeg. Invoked as a CLI by the Laravel app.",
+  "type": "module",
+  "main": "engine.mjs",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "puppeteer": "^24.43.1",
+    "wasm-media-encoders": "^0.7.0"
+  }
+}
