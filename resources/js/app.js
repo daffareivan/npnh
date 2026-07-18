@@ -70,6 +70,7 @@ window.wxConverter = ({ presets, defaultPresetId, creditBalance = 0, downloadCos
     showUpgradeModal: false,
     upgradeMessage: '',
     poller: null,
+    finalizeAttempts: 0,
     timeline: ['Uploading', 'Analyzing Audio', 'Applying Preset', 'Encoding OGG', 'Completed'],
     get activePreset() {
         return this.presets.find((preset) => preset.id === this.activePresetId) || this.presets[0];
@@ -130,16 +131,38 @@ window.wxConverter = ({ presets, defaultPresetId, creditBalance = 0, downloadCos
     },
     pollStatus() {
         clearInterval(this.poller);
+        this.finalizeAttempts = 0;
         this.poller = setInterval(() => {
             axios.get(`/api/converter/status/${this.audioFile.id}`).then((response) => {
                 this.audioFile = response.data.data;
+
+                if (this.audioFile.status === 'failed') {
+                    clearInterval(this.poller);
+                    this.progress = this.audioFile.progress;
+                    this.statusLabel = this.label(this.audioFile.status);
+                    this.result = null;
+                    return;
+                }
+
+                if (this.audioFile.status === 'finished') {
+                    // The per-file split/registration runs as a separate follow-up
+                    // job dispatched right after this status flips to "finished",
+                    // so split_count can briefly still be 0 here. Keep polling a
+                    // little longer instead of showing a result with no files.
+                    this.finalizeAttempts++;
+                    if (this.audioFile.split_count > 0 || this.finalizeAttempts >= 20) {
+                        clearInterval(this.poller);
+                        this.progress = this.audioFile.progress;
+                        this.statusLabel = this.label(this.audioFile.status);
+                        this.result = this.audioFile;
+                    } else {
+                        this.statusLabel = 'Finalizing files';
+                    }
+                    return;
+                }
+
                 this.progress = this.audioFile.progress;
                 this.statusLabel = this.label(this.audioFile.status);
-
-                if (['finished', 'failed'].includes(this.audioFile.status)) {
-                    clearInterval(this.poller);
-                    this.result = this.audioFile.status === 'finished' ? this.audioFile : null;
-                }
             });
         }, 1800);
     },
