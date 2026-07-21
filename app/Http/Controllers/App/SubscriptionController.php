@@ -14,6 +14,7 @@ use App\Services\SubscriptionService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 class SubscriptionController extends Controller
 {
@@ -48,7 +49,13 @@ class SubscriptionController extends Controller
             return redirect()->route('app.pricing')->with('status', 'Free plan activated.');
         }
 
-        return redirect($payments->checkoutUrl($order));
+        try {
+            return redirect($payments->checkoutUrl($order));
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('app.pricing')
+                ->with('status', $exception->getMessage());
+        }
     }
 
     public function showOrder(Request $request, Order $order, PaymentService $payments): View

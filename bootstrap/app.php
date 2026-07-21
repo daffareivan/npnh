@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         );
         $middleware->statefulApi();
         $middleware->validateCsrfTokens(except: [
-            'payment/midtrans/callback',
+            'payment/webhook/mustika',
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\ApplyUserPreferences::class,

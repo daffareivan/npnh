@@ -50,7 +50,10 @@ return [
         'api_url' => env('ROBLOX_API_URL', 'https://apis.roblox.com'),
         'scopes' => env('ROBLOX_SCOPES', 'openid profile'),
         'creator_hub_url' => env('ROBLOX_CREATOR_HUB_URL', 'https://create.roblox.com/dashboard/creations'),
+        'upload_auth' => env('ROBLOX_UPLOAD_AUTH', 'oauth'),
         'open_cloud_api_key' => env('ROBLOX_OPEN_CLOUD_API_KEY'),
+        'open_cloud_creator_user_id' => env('ROBLOX_OPEN_CLOUD_CREATOR_USER_ID'),
+        'open_cloud_creator_group_id' => env('ROBLOX_OPEN_CLOUD_CREATOR_GROUP_ID'),
     ],
 
     'midtrans' => [

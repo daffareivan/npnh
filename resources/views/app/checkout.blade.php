@@ -11,12 +11,20 @@
                     <p class="mt-2 font-semibold text-white">{{ $order->order_number }}</p>
                 </div>
                 <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                    <p class="text-sm text-[#A3A3A3]">{{ __('payment.credits') }}</p>
+                    <p class="mt-2 font-semibold text-white">{{ number_format((int) $order->plan->credits) }} Credits</p>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                     <p class="text-sm text-[#A3A3A3]">{{ __('payment.amount') }}</p>
                     <p class="mt-2 font-semibold text-white">Rp {{ number_format($order->amount, 0, ',', '.') }}</p>
                 </div>
+                <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                    <p class="text-sm text-[#A3A3A3]">{{ __('payment.status') }}</p>
+                    <p class="mt-2 font-semibold text-white">{{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}</p>
+                </div>
             </div>
             <p class="mt-6 text-sm leading-6 text-[#A3A3A3]">{{ __('payment.waiting_gateway') }}</p>
-            <a href="{{ $paymentUrl }}" class="wx-btn-primary mt-6 flex w-full items-center justify-center px-5 py-3 sm:inline-flex sm:w-auto">{{ __('payment.pay_with_midtrans') }}</a>
+            <a href="{{ $paymentUrl }}" class="wx-btn-primary mt-6 flex w-full items-center justify-center px-5 py-3 sm:inline-flex sm:w-auto">{{ __('payment.pay_with_mustika') }}</a>
         </x-wx.section-card>
     </section>
 @endsection

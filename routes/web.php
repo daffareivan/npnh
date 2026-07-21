@@ -31,7 +31,7 @@ Route::view('/privacy', 'legal.privacy', ['title' => __('pages.privacy')])->name
 Route::view('/terms', 'legal.terms', ['title' => __('pages.terms')])->name('terms');
 Route::post('/preferences/theme', [PreferenceController::class, 'theme'])->name('preferences.theme');
 Route::post('/preferences/locale', [PreferenceController::class, 'locale'])->name('preferences.locale');
-Route::post('/payment/midtrans/callback', [WebhookController::class, 'midtrans'])->name('payment.midtrans.callback');
+Route::post('/payment/webhook/mustika', [WebhookController::class, 'mustika'])->name('payment.mustika.webhook');
 
 Route::middleware('guest')->group(function (): void {
     Route::redirect('/login', '/signin')->name('login');
@@ -87,6 +87,8 @@ Route::middleware(['auth', 'active', 'verified.config'])->group(function (): voi
     Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
     Route::get('/payment/pending', [PaymentController::class, 'pending'])->name('payment.pending');
     Route::get('/payment/failed', [PaymentController::class, 'failed'])->name('payment.failed');
+    Route::get('/payment/orders/{order}/status', [PaymentController::class, 'status'])->name('payment.orders.status');
+    Route::post('/payment/orders/{order}/cancel', [PaymentController::class, 'cancel'])->name('payment.orders.cancel');
     Route::get('/user/payment/history', [InvoiceController::class, 'paymentHistory'])->name('payment.history');
     Route::get('/user/invoices', [InvoiceController::class, 'invoices'])->name('payment.invoices');
 });
@@ -95,6 +97,7 @@ Route::middleware(['auth', 'active', 'verified.config'])->prefix('integrations/r
     Route::get('/connect', [RobloxIntegrationController::class, 'redirect'])->middleware('throttle:6,1')->name('connect');
     Route::post('/switch', [RobloxIntegrationController::class, 'switch'])->middleware('throttle:6,1')->name('switch');
     Route::get('/callback', [RobloxIntegrationController::class, 'callback'])->middleware('throttle:12,1')->name('callback');
+    Route::get('/disconnect', fn () => redirect()->route('app.integrations.roblox')->with('status', 'Use the Disconnect button to remove the connected Roblox account.'))->name('disconnect.notice');
     Route::delete('/disconnect', [RobloxIntegrationController::class, 'disconnect'])->middleware('throttle:6,1')->name('disconnect');
 });
 

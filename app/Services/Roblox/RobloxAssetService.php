@@ -15,6 +15,10 @@ use RuntimeException;
 
 class RobloxAssetService
 {
+    public function __construct(
+        private readonly RobloxOAuthService $oauth,
+    ) {}
+
     public function uploadAudio(AudioFile $audioFile, RobloxAccount $account): AssetDTO
     {
         if (! $audioFile->output_path || ! Storage::exists($audioFile->output_path)) {
@@ -70,13 +74,11 @@ class RobloxAssetService
             'displayName' => mb_substr($displayName, 0, 50),
             'description' => 'Uploaded via NPNHCREATIVE',
             'creationContext' => [
-                'creator' => [
-                    'userId' => $account->roblox_user_id,
-                ],
+                'creator' => $this->creatorContext($account),
             ],
         ];
 
-        $response = $this->assetClient()
+        $response = $this->assetClient($account)
             ->send('POST', 'https://apis.roblox.com/assets/v1/assets', [
                 'multipart' => [
                     [
@@ -120,7 +122,7 @@ class RobloxAssetService
         $operationId = basename($operationPath);
 
         for ($attempt = 0; $attempt < 30; $attempt++) {
-            $operation = $this->assetClient()
+            $operation = $this->assetClient($account)
                 ->get("https://apis.roblox.com/assets/v1/operations/{$operationId}")
                 ->throw()
                 ->json();
@@ -148,8 +150,12 @@ class RobloxAssetService
         );
     }
 
-    private function assetClient(): PendingRequest
+    private function assetClient(RobloxAccount $account): PendingRequest
     {
+        if (config('services.roblox.upload_auth', 'oauth') === 'oauth') {
+            return Http::withToken($this->oauth->accessTokenFor($account))->acceptJson();
+        }
+
         $apiKey = config('services.roblox.open_cloud_api_key');
 
         if (! $apiKey) {
@@ -159,5 +165,24 @@ class RobloxAssetService
         return Http::withHeaders([
             'x-api-key' => $apiKey,
         ])->acceptJson();
+    }
+
+    private function creatorContext(RobloxAccount $account): array
+    {
+        if (config('services.roblox.upload_auth', 'oauth') === 'oauth') {
+            return ['userId' => (int) $account->roblox_user_id];
+        }
+
+        $groupId = config('services.roblox.open_cloud_creator_group_id');
+        if ($groupId) {
+            return ['groupId' => (int) $groupId];
+        }
+
+        $userId = config('services.roblox.open_cloud_creator_user_id');
+        if ($userId) {
+            return ['userId' => (int) $userId];
+        }
+
+        return ['userId' => (int) $account->roblox_user_id];
     }
 }

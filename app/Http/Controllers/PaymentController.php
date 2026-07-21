@@ -7,8 +7,11 @@ use App\Models\Order;
 use App\Models\Plan;
 use App\Services\OrderService;
 use App\Services\PaymentService;
+use App\Services\Payment\PaymentManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 class PaymentController extends Controller
 {
@@ -28,7 +31,13 @@ class PaymentController extends Controller
             return redirect()->route('app.pricing')->with('status', __('payment.free_plan_activated'));
         }
 
-        return redirect()->away($payments->checkoutUrl($order));
+        try {
+            return redirect()->away($payments->checkoutUrl($order));
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('app.pricing')
+                ->with('status', $exception->getMessage());
+        }
     }
 
     public function success(Request $request): RedirectResponse
@@ -43,6 +52,22 @@ class PaymentController extends Controller
 
     public function failed(Request $request): RedirectResponse
     {
+        return redirect()->route('payment.history')->with('status', __('payment.failed'));
+    }
+
+    public function status(Request $request, Order $order, PaymentManager $payments): JsonResponse
+    {
+        abort_unless($order->user_id === $request->user()->id, 403);
+
+        return response()->json($payments->gateway($order->payment_method ?: null)->checkStatus($order));
+    }
+
+    public function cancel(Request $request, Order $order, PaymentManager $payments): RedirectResponse
+    {
+        abort_unless($order->user_id === $request->user()->id, 403);
+
+        $payments->gateway($order->payment_method ?: null)->cancelPayment($order);
+
         return redirect()->route('payment.history')->with('status', __('payment.failed'));
     }
 }

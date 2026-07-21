@@ -1,169 +1,448 @@
 # NPNHCREATIVE
 
-**NPNHCREATIVE** is a Laravel-powered SaaS for converting audio files into Roblox-ready OGG assets. Users upload audio, apply speed/pitch presets (e.g. `2.3x`, `2.5x`, `2.7x` nightcore-style speed-ups with dB amplification), and download or push the converted file straight to Roblox via built-in OAuth integration. Access to conversions and downloads is metered through a credit system backed by subscription plans and Midtrans payments.
+NPNHCREATIVE is a Laravel SaaS application for converting audio into Roblox-ready assets. Users can upload audio, apply optimized speed presets, split long files automatically, download converted results, and upload assets to Roblox using the Roblox account they connect through OAuth.
 
-## ✨ Key Features
+The app uses a credit-based subscription model. Credits are not consumed while experimenting with conversion settings; they are consumed when users download a result or upload a converted file to Roblox.
 
-* 🎧 **Audio Conversion Pipeline** — Upload audio, process it asynchronously with a headless-Chromium (Web Audio API) engine (speed/pitch, bass boost, format), and track job status/progress in real time.
-* 🎛️ **Conversion Presets** — Admin-managed speed/amplify presets applied per upload.
-* 🎮 **Roblox Integration** — Connect a Roblox account via OAuth, and upload converted audio directly as a Roblox asset.
-* 💳 **Credit System** — Downloads and conversions consume credits; balances, history, and admin-configurable costs are tracked per user.
-* 📦 **Subscription Plans & Payments** — Plan-based subscriptions with checkout, manual/gateway payment confirmation, invoices, and [Midtrans](https://midtrans.com/) payment gateway integration (including webhook handling).
-* 👥 **Community** — User reviews, comments, helpful votes, badges, and reports on the homepage, moderated from the admin panel.
-* 🔐 **Authentication** — Email/password auth plus Google OAuth login, email verification, and password reset flows.
-* 🛠️ **Admin Dashboard** — Manage users, conversions, queue/activity monitoring, credit settings, subscription plans/orders/transactions, community moderation, and app-wide settings.
-* 🎨 **Tailwind CSS v4 + Alpine.js UI** — Responsive, dark-mode-ready dashboard UI (built on the TailAdmin Laravel component set).
+## Recent Updates From The Last 5 Commits
 
-## 🧱 Tech Stack
+These notes are based on the latest five commits in the repository:
 
-* **Laravel 12** (PHP 8.4)
-* **Tailwind CSS v4** + **Alpine.js** + **Vite**
-* **Node.js + Puppeteer (headless Chromium)** for audio conversion — see `audio-engine/` (no ffmpeg dependency)
-* **spatie/laravel-permission** for roles & permissions
-* **laravel/socialite** for Google OAuth
-* **midtrans/midtrans-php** for payments
-* **Pest** for testing
+- `eed913e` - Finished conversions are hidden from History until the user downloads a result or uploads it to Roblox. In-progress and failed entries still appear.
+- `1af7ad5` - Improved the frontend flow for automatic file splitting.
+- `60894b7` - Replaced the FFmpeg conversion service with the Node/Web Audio conversion engine in `audio-engine/`.
+- `0d60cd2` - Added automatic split-file conversion, per-file resources, download-all flow, split conversion jobs, and Roblox upload support for conversion files.
+- `66abfed` - Added polished error pages, upload limits, localized page/error strings, and related admin/user UI updates.
 
-## 📋 Requirements
+## Key Features
 
-* **PHP 8.4+** with the extensions Laravel requires
-* **Composer**
-* **Node.js 18+** and **npm** — also used to run the `audio-engine/` conversion engine (`cd audio-engine && npm install` once; downloads a bundled Chromium via Puppeteer)
-* **Database** — MySQL (default) or any Laravel-supported driver
-* A queue worker running (`CONVERTER_QUEUE`, default `audio-conversion`) to process conversion jobs
+- Audio conversion pipeline with asynchronous processing and real-time status.
+- Optimized Roblox audio presets such as `2.3x`, `2.5x`, and `2.7x`.
+- Automatic split-file conversion for long audio.
+- Per-file result management, download logs, and download-all archive support.
+- Roblox OAuth connection and per-connected-account upload flow.
+- Credit system for downloads and Roblox uploads.
+- Subscription plans: Free, Standard, Premium, and Custom.
+- Mustika Payment gateway integration using `mustikapay-node`.
+- Payment webhook processing through Laravel jobs.
+- Invoices, payment history, payment transactions, and payment notifications.
+- Homepage reviews, comments, badges, helpful votes, and admin moderation.
+- Google OAuth login plus email/password authentication.
+- Admin dashboard for users, conversions, credits, subscriptions, payments, reviews, settings, and activity.
+- Theme and language preferences across the app.
 
-## 🚀 Installation
+## Tech Stack
 
-### 1. Install dependencies
+- Laravel 12
+- PHP 8.4+
+- PostgreSQL
+- Tailwind CSS v4
+- Alpine.js
+- Vite
+- Node.js
+- `mustikapay-node` for Mustika Payment API access
+- `spatie/laravel-permission` for roles and permissions
+- `laravel/socialite` for Google OAuth
+- Pest for tests
+
+## Audio Engine
+
+The conversion engine lives in `audio-engine/` and is called from Laravel through `NodeAudioConverter`.
+
+The app no longer depends on FFmpeg for the main conversion path. Instead, it uses a Node-powered Web Audio pipeline with a headless browser engine.
+
+Install audio engine dependencies once:
 
 ```bash
-composer install
+cd audio-engine
 npm install
-cd audio-engine && npm install && cd ..
+cd ..
 ```
 
-The `audio-engine` install downloads a bundled Chromium via Puppeteer (~300MB) — this is what the conversion pipeline uses instead of ffmpeg. On a minimal Ubuntu server, headless Chromium needs a handful of shared libraries that aren't installed by default (`libnss3`, `libatk1.0-0`, `libgbm1`, `libasound2`, etc.) — install them with:
+On a minimal Linux server, Chromium may require extra shared libraries:
 
 ```bash
 sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
   libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2
 ```
 
-### 2. Configure environment
+## Installation
+
+### 1. Clone and enter the project
+
+```bash
+git clone <repository-url> converter
+cd converter
+```
+
+If you already have the project folder, start from the project root:
+
+```bash
+cd D:\converter
+```
+
+### 2. Install backend dependencies
+
+```bash
+composer install
+```
+
+### 3. Install frontend and payment bridge dependencies
+
+The main frontend and MustikaPay Node bridge use the root `package.json`.
+
+```bash
+npm install
+```
+
+This installs `mustikapay-node`, Vite, Tailwind, Alpine, and the dashboard frontend dependencies.
+
+### 4. Install audio engine dependencies
+
+The conversion engine has its own Node project in `audio-engine/`.
+
+```bash
+cd audio-engine
+npm install
+cd ..
+```
+
+### 5. Create and configure `.env`
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-Set at minimum:
+Set the required database, app URL, Node, audio engine, OAuth, Roblox, and MustikaPay values in `.env`.
+
+For local development:
 
 ```env
-APP_NAME=NPNHCREATIVE
-
-DB_CONNECTION=mysql
-DB_DATABASE=your_database
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
-
+APP_URL=http://127.0.0.1:8000
+QUEUE_CONNECTION=sync
 NODE_BINARY=node
-AUDIO_ENGINE_PATH=/absolute/path/to/audio-engine/engine.mjs
-
-# Optional integrations
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-
-MIDTRANS_MERCHANT_ID=
-MIDTRANS_CLIENT_KEY=
-MIDTRANS_SERVER_KEY=
+AUDIO_ENGINE_PATH=D:/converter/audio-engine/engine.mjs
 ```
 
-### 3. Set up the database
+For webhook testing through ngrok, use the ngrok URL:
+
+```env
+APP_URL=https://your-ngrok-domain.ngrok-free.dev
+MUSTIKA_CALLBACK_URL="${APP_URL}/payment/webhook/mustika"
+ROBLOX_REDIRECT_URI="${APP_URL}/integrations/roblox/callback"
+GOOGLE_REDIRECT_URI="${APP_URL}/auth/google/callback"
+```
+
+### 6. Prepare the database
 
 ```bash
 php artisan migrate
-php artisan db:seed   # optional: sample data (plans, presets, settings, etc.)
+php artisan db:seed
 ```
 
-### 4. Link storage
+Seeders create the default plans, credit settings, navigation, admin data, and conversion presets used by the app.
+
+### 7. Link storage
 
 ```bash
 php artisan storage:link
 ```
 
-## 🏃 Running the Application
+### 8. Build frontend assets
 
-Start everything (server, queue worker, log tail, Vite) in one go:
+For development:
+
+```bash
+npm run dev
+```
+
+For production/static assets:
+
+```bash
+npm run build
+```
+
+### 9. Clear cached config
+
+Run this after changing `.env`:
+
+```bash
+php artisan config:clear
+```
+
+## Required Environment
+
+Basic application setup:
+
+```env
+APP_NAME=NPNHCREATIVE
+APP_URL=http://127.0.0.1:8000
+
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=roblox
+DB_USERNAME=postgres
+DB_PASSWORD=
+
+NODE_BINARY=node
+AUDIO_ENGINE_PATH=/absolute/path/to/audio-engine/engine.mjs
+AUDIO_ENGINE_TIMEOUT=900
+```
+
+For local webhook testing through ngrok, set `APP_URL` to the ngrok URL:
+
+```env
+APP_URL=https://your-ngrok-domain.ngrok-free.dev
+```
+
+## Mustika Payment
+
+Mustika Payment is the active payment gateway. Laravel calls `mustikapay-node` through:
+
+```text
+resources/js/mustika-payment-bridge.cjs
+```
+
+Payment configuration:
+
+```env
+PAYMENT_GATEWAY=mustika
+MUSTIKA_BASE_URL=https://mustikapayment.com
+MUSTIKA_API_KEY=MP-xxxx
+MUSTIKA_MERCHANT_ID=
+MUSTIKA_CALLBACK_SECRET=
+MUSTIKA_CALLBACK_URL="${APP_URL}/payment/webhook/mustika"
+MUSTIKA_RETURN_URL="${APP_URL}/payment/success"
+MUSTIKA_CANCEL_URL="${APP_URL}/payment/failed"
+MUSTIKA_ENV=sandbox
+MUSTIKA_RESOLVED_IP=
+```
+
+Webhook endpoint:
+
+```text
+POST /payment/webhook/mustika
+```
+
+For local development you can keep queue processing synchronous:
+
+```env
+QUEUE_CONNECTION=sync
+```
+
+For production, use a real queue worker:
+
+```bash
+php artisan queue:work
+```
+
+If local DNS has issues resolving `mustikapayment.com`, leave `MUSTIKA_RESOLVED_IP` empty first. Only set it if your environment requires a manual resolved IP.
+
+## Roblox Integration
+
+Roblox uploads use the Roblox account connected by the current user:
+
+```env
+ROBLOX_UPLOAD_AUTH=oauth
+ROBLOX_CLIENT_ID=
+ROBLOX_CLIENT_SECRET=
+ROBLOX_REDIRECT_URI="${APP_URL}/integrations/roblox/callback"
+ROBLOX_SCOPES="openid profile asset:read asset:write"
+```
+
+These are not needed for per-connected-account uploads and should usually stay empty:
+
+```env
+ROBLOX_OPEN_CLOUD_CREATOR_USER_ID=
+ROBLOX_OPEN_CLOUD_CREATOR_GROUP_ID=
+```
+
+Only use fixed creator IDs if you intentionally switch back to API-key based upload for one fixed user or group.
+
+## Google OAuth
+
+```env
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI="${APP_URL}/auth/google/callback"
+```
+
+In Google Cloud Console, add:
+
+```text
+Authorized JavaScript origin: APP_URL
+Authorized redirect URI: APP_URL/auth/google/callback
+```
+
+## Running The App
+
+### Local Development
+
+Start Laravel:
+
+```bash
+php artisan serve
+```
+
+Start Vite in a second terminal:
+
+```bash
+npm run dev
+```
+
+If `QUEUE_CONNECTION=sync`, you do not need a queue worker for local webhook testing.
+
+If you use `database`, `redis`, or another queue driver, start a worker:
+
+```bash
+php artisan queue:work
+```
+
+Or use the Composer dev script:
 
 ```bash
 composer run dev
 ```
 
-App will be available at [http://localhost:8000](http://localhost:8000).
+## Production Build
 
-Or run services individually:
-
-```bash
-php artisan serve
-php artisan queue:listen        # required for audio conversion jobs
-npm run dev
-```
-
-### Production build
+Install optimized PHP dependencies:
 
 ```bash
-npm run build
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
 composer install --optimize-autoloader --no-dev
 ```
 
-## 🧪 Testing
+Build assets:
 
 ```bash
-composer run test
-# or
+npm install
+cd audio-engine && npm install && cd ..
+npm run build
+```
+
+Run database setup:
+
+```bash
+php artisan migrate --force
+php artisan storage:link
+```
+
+Cache Laravel config:
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+For production payments, make sure:
+
+- `APP_URL` uses HTTPS.
+- Mustika webhook URL is set to `/payment/webhook/mustika`.
+- The server public IP is whitelisted in MustikaPay if required.
+- A queue worker is running if `QUEUE_CONNECTION` is not `sync`.
+
+Example queue worker command:
+
+```bash
+php artisan queue:work --tries=3 --timeout=900
+```
+
+On a VPS, run the queue worker with Supervisor or a similar process manager.
+
+## Testing
+
+```bash
 php artisan test
-php artisan test --filter=SomeTest
 ```
 
-## 📁 Project Structure
+Frontend build:
 
-```
-converter/
-├── app/
-│   ├── DTO/                    # Data transfer objects (upload, Roblox)
-│   ├── Enums/                  # ConversionStatus and other enums
-│   ├── Http/Controllers/
-│   │   ├── Admin/              # Admin panel (users, credits, subscriptions, community, settings)
-│   │   ├── App/                # Authenticated app (converter, Roblox, subscription, community)
-│   │   ├── Auth/                # Sign in/up, Google OAuth, password reset, email verification
-│   │   └── Converter/           # Public converter page + API
-│   ├── Jobs/                    # ProcessAudioConversion queue job
-│   ├── Models/                  # AudioFile, ConversionJob/Preset, Plan, Order, Subscription, ...
-│   ├── Services/
-│   │   ├── Roblox/              # OAuth, account, asset, token, user services
-│   │   ├── ConverterService.php # Upload/convert/download/delete pipeline
-│   │   ├── CreditService.php    # Credit balance & deduction
-│   │   ├── NodeAudioConverter.php # Headless-Chromium conversion engine bridge (audio-engine/)
-│   │   ├── MidtransService.php / PaymentService.php / SubscriptionService.php
-│   │   └── CommunityService.php
-│   └── Repositories/            # AudioFileRepository, etc.
-├── config/converter.php         # Converter-specific configuration
-├── database/migrations/         # Users, audio files, credits, plans, community, ...
-├── resources/views/
-│   ├── app/                     # Authenticated user views (converter, integrations, community)
-│   ├── pages/admin/              # Admin panel views
-│   └── layouts/                  # App/auth/sidebar layouts
-├── routes/web.php               # All application routes
-└── docs/                        # Additional project notes
+```bash
+npm run build
 ```
 
-## 🔑 Access Control
+## Project Structure
 
-Routes are protected with role/permission middleware (`role:user|admin`, `permission:converter.upload|converter.convert`, `active`, `verified.config`) powered by `spatie/laravel-permission`. Admin-only routes live under `/admin` and require the `admin` role.
+```text
+app/
+  Http/Controllers/
+    Admin/
+    App/
+    Auth/
+    Converter/
+  Jobs/
+    ProcessAudioConversion.php
+    SplitAudioConversionJob.php
+    ProcessPaymentWebhook.php
+  Models/
+  Services/
+    Payment/
+      PaymentGatewayInterface.php
+      PaymentManager.php
+      MustikaPaymentService.php
+    Roblox/
+    NodeAudioConverter.php
+    AudioSplitService.php
+    CreditService.php
+    SubscriptionService.php
+audio-engine/
+config/
+  converter.php
+  payment.php
+resources/
+  js/
+    mustika-payment-bridge.cjs
+  views/
+routes/
+  web.php
+  api.php
+```
+
+## Payment Flow
+
+1. User chooses a plan.
+2. Laravel creates an order.
+3. `PaymentService` resolves the active gateway through `PaymentManager`.
+4. `MustikaPaymentService` calls the Node bridge.
+5. The Node bridge calls MustikaPay through `mustikapay-node`/Axios.
+6. MustikaPay sends webhook to `/payment/webhook/mustika`.
+7. `ProcessPaymentWebhook` updates the transaction.
+8. Successful payment activates the subscription, adds credits, creates invoice data, and sends notifications.
+
+## Credit Rules
+
+Credits are consumed only for:
+
+- Downloading converted audio.
+- Uploading converted audio to Roblox.
+
+Credits are not consumed for:
+
+- Uploading source audio.
+- Converting audio.
+- Previewing audio.
+- Changing playback speed or preset.
+- Login/logout.
+
+## Access Control
+
+Routes use role and permission middleware powered by `spatie/laravel-permission`.
+
+Admin routes live under:
+
+```text
+/admin
+```
+
+User app routes live under:
+
+```text
+/app
+```
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT

@@ -10,18 +10,36 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class PaymentTransaction extends Model
 {
     public const PROVIDER_MIDTRANS = 'midtrans';
+    public const PROVIDER_MUSTIKA = 'mustika';
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_EXPIRED = 'expired';
+    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_FAILED = 'failed';
+    public const STATUS_REFUNDED = 'refunded';
 
     protected $fillable = [
+        'invoice_number',
+        'payment_gateway',
+        'payment_reference',
+        'gateway_transaction_id',
         'user_id',
+        'plan_id',
         'subscription_id',
         'provider',
         'order_id',
         'provider_transaction_id',
         'payment_type',
         'gross_amount',
+        'amount',
+        'fee',
+        'status',
+        'payment_method',
+        'expired_at',
         'transaction_status',
         'fraud_status',
         'signature_key',
+        'callback_payload',
         'raw_response',
         'paid_at',
     ];
@@ -30,6 +48,10 @@ class PaymentTransaction extends Model
     {
         return [
             'gross_amount' => 'integer',
+            'amount' => 'integer',
+            'fee' => 'integer',
+            'expired_at' => 'datetime',
+            'callback_payload' => 'array',
             'raw_response' => 'array',
             'paid_at' => 'datetime',
         ];
@@ -57,11 +79,11 @@ class PaymentTransaction extends Model
 
     public function isPaid(): bool
     {
-        return in_array($this->transaction_status, ['settlement', 'capture'], true);
+        return in_array($this->transaction_status, ['settlement', 'capture', self::STATUS_PAID], true);
     }
 
     public function formattedAmount(): string
     {
-        return 'Rp '.number_format($this->gross_amount, 0, ',', '.');
+        return 'Rp '.number_format($this->amount ?: $this->gross_amount, 0, ',', '.');
     }
 }
