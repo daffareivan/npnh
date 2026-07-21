@@ -25,7 +25,7 @@ class RobloxOAuthService
             'response_type' => 'code',
             'scope' => config('services.roblox.scopes', 'openid profile'),
             'state' => $state,
-            'prompt' => 'select_account',
+            'prompt' => 'consent select_account',
         ];
 
         if ($forcePrompt) {

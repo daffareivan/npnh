@@ -13,6 +13,7 @@ use App\Services\CreditService;
 use App\Services\CommunityService;
 use App\Services\SubscriptionService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -21,6 +22,7 @@ class UserAppController extends Controller
     public function dashboard(Request $request, SubscriptionService $subscriptions, CommunityService $community): View
     {
         $query = AudioFile::query()->where('user_id', $request->user()->id);
+        $historyQuery = $this->visibleHistoryQuery($request->user()->id);
         $currentPlan = $subscriptions->currentPlan($request->user());
         $community->syncMembershipBadge($request->user()->fresh(['activeSubscription.plan']));
         $request->user()->load('badges');
@@ -33,7 +35,7 @@ class UserAppController extends Controller
                 'month' => (clone $query)->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
                 'storage' => (clone $query)->sum('output_size') + (clone $query)->sum('original_size'),
             ],
-            'recent' => (clone $query)->latest()->limit(6)->get(),
+            'recent' => $historyQuery->with('files')->latest()->limit(6)->get(),
             'presets' => ConversionPreset::query()->orderBy('speed')->get(),
             'defaultPreset' => ConversionPreset::query()->where('is_default', true)->first(),
             'robloxAccount' => $request->user()->robloxAccount,
@@ -69,17 +71,9 @@ class UserAppController extends Controller
         // Every download is its own timeline entry (like a transaction log), in addition
         // to the conversion entry itself, so downloading the same file repeatedly still
         // shows up as separate history rows.
-        $conversions = AudioFile::query()
-            ->where('user_id', $user->id)
+        $conversions = $this->visibleHistoryQuery($user->id)
             ->when($search, fn ($query, $search) => $query->where('original_name', 'like', "%{$search}%"))
             ->when($status, fn ($query, $status) => $query->where('status', $status))
-            // A finished conversion only earns its place in history once the user has
-            // actually done something with it (downloaded or uploaded to Roblox) —
-            // otherwise it clutters the list the moment the background job finishes.
-            ->where(function ($query): void {
-                $query->where('status', '!=', ConversionStatus::Finished->value)
-                    ->orWhereHas('files', fn ($q) => $q->whereNotNull('downloaded_at')->orWhereNotNull('uploaded_at'));
-            })
             ->with('files')
             ->latest()
             ->limit(500)
@@ -132,5 +126,16 @@ class UserAppController extends Controller
                 'storage' => (clone $query)->sum('output_size') + (clone $query)->sum('original_size'),
             ],
         ]);
+    }
+
+    private function visibleHistoryQuery(int $userId): Builder
+    {
+        return AudioFile::query()
+            ->where('user_id', $userId)
+            ->where('status', '!=', ConversionStatus::Deleted->value)
+            ->where(function ($query): void {
+                $query->where('status', '!=', ConversionStatus::Finished->value)
+                    ->orWhereHas('files', fn ($q) => $q->whereNotNull('downloaded_at')->orWhereNotNull('uploaded_at'));
+            });
     }
 }

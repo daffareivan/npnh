@@ -43,6 +43,7 @@
                                     <span>Preset {{ $file->speed }}x</span>
                                     <span>{{ \Illuminate\Support\Number::fileSize($file->output_size ?: $file->original_size) }}</span>
                                     <span>{{ $totalDuration ? gmdate('i:s', (int) $totalDuration) : 'Duration pending' }}</span>
+                                    <span class="uppercase tracking-[0.12em]">UPLOAD FROM NPNH CREATIVE</span>
                                     @if($fileCount === 1)
                                         <span>Roblox: {{ ucfirst($file->roblox_status ?? 'pending') }}</span>
                                         @if($file->roblox_asset_id)

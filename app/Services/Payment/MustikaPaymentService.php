@@ -31,6 +31,7 @@ class MustikaPaymentService implements PaymentGatewayInterface
     public function createPayment(Order $order): PaymentCheckoutData
     {
         $order->loadMissing(['user', 'plan']);
+        $requestPayloadVersion = 2;
         $subscription = $this->ensurePendingSubscription($order);
 
         $existing = PaymentTransaction::query()
@@ -39,13 +40,24 @@ class MustikaPaymentService implements PaymentGatewayInterface
             ->whereIn('status', [PaymentTransaction::STATUS_PENDING, Order::STATUS_WAITING_PAYMENT])
             ->first();
 
-        if ($existing && $existing->payment_reference && is_array($existing->raw_response)) {
+        if (
+            $existing
+            && $existing->payment_reference
+            && is_array($existing->raw_response)
+            && ($existing->raw_response['_request_payload_version'] ?? null) === $requestPayloadVersion
+        ) {
             return $this->normalizeCheckout($existing->raw_response);
         }
 
         $payload = [
             'amount' => (int) $order->amount,
             'user' => $order->user->email,
+            'customer_name' => $order->user->name,
+            'customer_email' => $order->user->email,
+            'product_name' => 'NPNHCREATIVE '.$order->plan->name.' Plan',
+            'product_description' => $order->plan->credits
+                ? $order->plan->credits.' Credits for NPNHCREATIVE'
+                : 'NPNHCREATIVE subscription plan',
             'merchant_id' => config('payment.mustika.merchant_id'),
             'invoice_number' => $order->order_number,
             'callback_url' => config('payment.mustika.callback_url'),
@@ -76,7 +88,7 @@ class MustikaPaymentService implements PaymentGatewayInterface
                 'status' => PaymentTransaction::STATUS_PENDING,
                 'transaction_status' => PaymentTransaction::STATUS_PENDING,
                 'expired_at' => $data->expiredAt,
-                'raw_response' => $data->payload,
+                'raw_response' => array_merge($data->payload, ['_request_payload_version' => $requestPayloadVersion]),
             ]
         );
 

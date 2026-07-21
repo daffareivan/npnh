@@ -39,11 +39,34 @@ const respond = (payload, exitCode = 0) => {
             case 'create_qris':
                 result = await directRequest(input, 'POST', '/api/v1/create/qris', {
                     amount: Number(input.payload.amount),
+                    user: input.payload.user,
+                    customer: input.payload.customer_name || input.payload.user,
+                    customer_name: input.payload.customer_name || input.payload.user,
+                    customer_email: input.payload.customer_email || input.payload.user,
+                    name: input.payload.product_name,
+                    product: input.payload.product_name,
+                    product_name: input.payload.product_name,
+                    product_description: input.payload.product_description,
+                    description: input.payload.product_description,
+                    invoice_number: input.payload.invoice_number,
+                    merchant_id: input.payload.merchant_id,
+                    callback_url: input.payload.callback_url,
+                    return_url: input.payload.return_url,
+                    cancel_url: input.payload.cancel_url,
                 });
                 if (shouldTryLegacy(result)) {
                     result = await directRequest(input, 'POST', '/api/createpay', {
                         amount: Number(input.payload.amount),
                         user: input.payload.user,
+                        customer: input.payload.customer_name || input.payload.user,
+                        customer_name: input.payload.customer_name || input.payload.user,
+                        customer_email: input.payload.customer_email || input.payload.user,
+                        name: input.payload.product_name,
+                        product: input.payload.product_name,
+                        product_name: input.payload.product_name,
+                        product_description: input.payload.product_description,
+                        description: input.payload.product_description,
+                        invoice_number: input.payload.invoice_number,
                     });
                 }
                 break;

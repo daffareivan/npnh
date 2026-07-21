@@ -32,6 +32,8 @@ class ConverterApiController extends Controller
         // so a not-yet-initialized null limit can't be misread as "unlimited".
         $subscriptions->ensureFreeSubscription($request->user());
         $user = $request->user()->fresh();
+        $this->converter->syncUploadsUsed($user);
+        $user->refresh();
 
         abort_if(
             $user->hasReachedUploadLimit(),

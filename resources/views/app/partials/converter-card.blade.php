@@ -103,6 +103,7 @@
                 <thead class="border-b border-white/[0.06] bg-black/20">
                     <tr>
                         <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.12em] text-[#6B7280]">{{ __('converter.file_name') }}</th>
+                        <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.12em] text-[#6B7280]">Description</th>
                         <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.12em] text-[#6B7280]">Duration</th>
                         <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.12em] text-[#6B7280]">Status</th>
                         <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.12em] text-[#6B7280]">Actions</th>
@@ -112,6 +113,7 @@
                     <template x-for="file in (result?.files || [])" :key="file.id">
                         <tr>
                             <td class="px-4 py-3 font-medium" x-text="file.label"></td>
+                            <td class="px-4 py-3 text-[#A3A3A3]" x-text="file.roblox_description || 'UPLOAD FROM NPNH CREATIVE'"></td>
                             <td class="px-4 py-3 text-[#A3A3A3]" x-text="formatDuration(file.duration)"></td>
                             <td class="px-4 py-3 text-[#A3A3A3]" x-text="fileState(file).message || (file.upload_status === 'uploaded' ? '{{ __('converter.uploaded') }}' : '')"></td>
                             <td class="px-4 py-3">
@@ -140,6 +142,7 @@
                         <p class="shrink-0 text-sm text-[#A3A3A3]" x-text="formatDuration(file.duration)"></p>
                     </div>
                     <p x-show="fileState(file).message || file.upload_status === 'uploaded'" class="mt-2 text-xs text-[#A3A3A3]" x-text="fileState(file).message || '{{ __('converter.uploaded') }}'"></p>
+                    <p class="mt-2 text-xs uppercase tracking-[0.14em] text-[#A3A3A3]" x-text="file.roblox_description || 'UPLOAD FROM NPNH CREATIVE'"></p>
                     <div class="mt-3 flex flex-wrap gap-2">
                         <button type="button" @click="downloadFile(file)" :disabled="fileState(file).downloading" class="wx-btn-secondary flex-1 px-3 py-2 text-xs" x-text="fileState(file).downloading ? '...' : '{{ __('converter.download') }}'"></button>
                         @auth

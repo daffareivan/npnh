@@ -27,6 +27,7 @@ class ConversionFileResource extends JsonResource
             'roblox_asset_id' => $this->roblox_asset_id,
             'roblox_creator_url' => $this->roblox_creator_url,
             'roblox_error_message' => $this->roblox_error_message,
+            'roblox_description' => 'UPLOAD FROM NPNH CREATIVE',
             'download_url' => URL::temporarySignedRoute('api.converter.files.download', now()->addMinutes(15), $this->resource),
         ];
     }

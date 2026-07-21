@@ -32,6 +32,7 @@ class AudioFileResource extends JsonResource
             'roblox_asset_id' => $this->roblox_asset_id,
             'roblox_creator_url' => $this->roblox_creator_url,
             'roblox_error_message' => $this->roblox_error_message,
+            'roblox_description' => 'UPLOAD FROM NPNH CREATIVE',
             'created_at' => $this->created_at?->toISOString(),
             'finished_at' => $this->finished_at?->toISOString(),
             'download_url' => $this->output_path ? URL::temporarySignedRoute('api.converter.download', now()->addMinutes(15), $this->resource) : null,

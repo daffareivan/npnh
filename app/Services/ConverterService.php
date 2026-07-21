@@ -15,6 +15,7 @@ use App\Models\DownloadLog;
 use App\Models\User;
 use App\Repositories\AudioFileRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -113,20 +114,36 @@ class ConverterService
 
     public function delete(AudioFile $audioFile): void
     {
-        Storage::delete(array_filter([$audioFile->original_path, $audioFile->output_path]));
-        ActivityLog::query()->create([
-            'user_id' => auth()->id(),
-            'subject_type' => $audioFile::class,
-            'subject_id' => $audioFile->id,
-            'event' => 'delete',
-            'properties' => ['file' => $audioFile->original_name],
-        ]);
+        DB::transaction(function () use ($audioFile): void {
+            Storage::delete(array_filter([$audioFile->original_path, $audioFile->output_path]));
+            ActivityLog::query()->create([
+                'user_id' => auth()->id(),
+                'subject_type' => $audioFile::class,
+                'subject_id' => $audioFile->id,
+                'event' => 'delete',
+                'properties' => ['file' => $audioFile->original_name],
+            ]);
 
-        if ($audioFile->user_id) {
-            User::query()->where('id', $audioFile->user_id)->where('uploads_used', '>', 0)->decrement('uploads_used');
-        }
+            $userId = $audioFile->user_id;
 
-        $audioFile->forceFill(['status' => ConversionStatus::Deleted])->save();
-        $audioFile->delete();
+            $audioFile->forceFill(['status' => ConversionStatus::Deleted])->save();
+            $audioFile->delete();
+
+            if ($userId) {
+                $this->syncUploadsUsed(User::query()->findOrFail($userId));
+            }
+        });
+    }
+
+    public function syncUploadsUsed(User $user): int
+    {
+        $used = AudioFile::query()
+            ->where('user_id', $user->id)
+            ->where('status', '!=', ConversionStatus::Deleted->value)
+            ->count();
+
+        $user->forceFill(['uploads_used' => $used])->save();
+
+        return $used;
     }
 }
